@@ -33,7 +33,6 @@ HOST = f"https://cdn.jsdelivr.net/gh/{REPO}@main/extension/npc"
 
 OUT_H = 534          # 2x от игровых 181x267
 FPS = 24
-FEATHER = 18         # px растушёвки боковых стыков с апскейлом
 MIN_LOOP = 72        # кадров, минимум 3 с — короче петля читается как дёрганье
 BAR = 10             # яркость, ниже которой строка кадра считается чёрным полем
 
@@ -143,19 +142,18 @@ def build(video: Path, still: Path, original: Path, name: str):
     if native:
         canvas = loop
     else:
-        base = raw(["-i", str(still), "-vf", f"scale={out_w}:{OUT_H}", "-pix_fmt", "rgb24"],
-                   out_w, OUT_H, 3)[0]
-        # растушёвка стыка видео с апскейлом по боковым краям
-        alpha = np.ones(vid_w, np.float32)
-        ramp = np.linspace(0, 1, FEATHER, endpoint=False, dtype=np.float32)
-        alpha[:FEATHER], alpha[-FEATHER:] = ramp, ramp[::-1]
-        alpha = alpha[None, None, :, None]
-
-        canvas = np.repeat(base[None], L, 0).astype(np.float32)
-        region = canvas[:, :, x0:x0 + vid_w]
-        canvas[:, :, x0:x0 + vid_w] = alpha * loop + (1 - alpha) * region
-        canvas = np.clip(canvas, 0, 255).astype(np.uint8)
-        print(f"   видео 9:16 -> вложено в апскейл, стык растушёван {FEATHER} px")
+        # Бока добираются растяжкой крайних столбцов самого видео, а не кусками
+        # статичного апскейла: статика рядом с анимацией и давала тот заметный
+        # стык — генератор перерисовывает середину, и она расходится с
+        # нетронутыми краями. Растянутый край движется вместе с кадром, а фон
+        # у портретов по краям однородный (небо, трава, стена), так что смаз
+        # незаметен.
+        canvas = np.concatenate([
+            np.repeat(loop[:, :, :1], x0, 2),
+            loop,
+            np.repeat(loop[:, :, -1:], out_w - vid_w - x0, 2),
+        ], axis=2)
+        print(f"   кроп 9:16 -> бока добраны растяжкой краёв по {x0} px")
 
     EXT_NPC.mkdir(parents=True, exist_ok=True)
     out = EXT_NPC / f"{name}.tmp"
