@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mist Overhaul
 // @namespace    https://github.com/netherguy4/mist-overhaul
-// @version      2026.08.12.1839
+// @version      2026.08.12.1845
 // @description  Анимированные портреты персонажей в Mist
 // @author       nether
 // @match        *://*.mist-game.ru/*
@@ -28,28 +28,28 @@
 
   // --- ссылки на портреты, дальше до конца блока правит build.py ---
   const URLS = {
-    bride_amalia_milton_8thmarch: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/bride_amalia_milton_8thmarch.d967b96a.webm",
-    caravaneer: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/caravaneer.8b72da77.webp",
-    corvin: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/corvin.7a5385be.webp",
-    cpt_tirim_mormont: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/cpt_tirim_mormont.84bb7f27.webp",
-    demandred: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/demandred.e9d423c6.webp",
-    ghost_boss_traun: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/ghost_boss_traun.9bc6cb3f.webp",
-    ghost_simon_kornish: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/ghost_simon_kornish.ebfe3d4d.webp",
-    guild_violett_tari: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/guild_violett_tari.06ff7579.webp",
-    ifrit: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/ifrit.386e8562.webp",
-    indiana_lester: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/indiana_lester.88391638.webp",
-    innkeeper: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/innkeeper.7d53e6d9.webp",
-    lumberjack: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/lumberjack.18128d81.webp",
-    oracle: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/oracle.e3b195e3.webp",
-    overseas_koitira: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/overseas_koitira.53bd8115.webp",
-    poacher_vargo: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/poacher_vargo.ada88acc.webp",
-    postman: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/postman.3707b1b1.webp",
-    prisoner_toivo_beilish: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/prisoner_toivo_beilish.38da288f.webp",
-    rogue_boss_eshtar: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/rogue_boss_eshtar.c85fc95b.webp",
-    rogue_brun: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/rogue_brun.87712dec.webp",
-    rogue_girl_deina: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/rogue_girl_deina.5adb079c.webp",
-    scientist_arvin_pottery_jr: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/scientist_arvin_pottery_jr.fcd7a9e1.webp",
-    white_mage: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/white_mage.a84b043d.webp",
+    bride_amalia_milton_8thmarch: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/bride_amalia_milton_8thmarch.413c5125.webm",
+    caravaneer: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/caravaneer.a7985f66.webp",
+    corvin: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/corvin.be8f8927.webp",
+    cpt_tirim_mormont: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/cpt_tirim_mormont.2b975809.webp",
+    demandred: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/demandred.2706d5a4.webp",
+    ghost_boss_traun: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/ghost_boss_traun.94cdbff9.webp",
+    ghost_simon_kornish: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/ghost_simon_kornish.ee85a3ee.webp",
+    guild_violett_tari: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/guild_violett_tari.d45dd6d5.webp",
+    ifrit: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/ifrit.c8f1d842.webp",
+    indiana_lester: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/indiana_lester.1a3e47be.webp",
+    innkeeper: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/innkeeper.2b745fa5.webp",
+    lumberjack: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/lumberjack.7cdf6d49.webp",
+    oracle: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/oracle.4f4236f0.webp",
+    overseas_koitira: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/overseas_koitira.b4dabb53.webp",
+    poacher_vargo: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/poacher_vargo.07f14792.webp",
+    postman: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/postman.bf42d710.webp",
+    prisoner_toivo_beilish: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/prisoner_toivo_beilish.d5f8cf9a.webp",
+    rogue_boss_eshtar: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/rogue_boss_eshtar.b60c9191.webp",
+    rogue_brun: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/rogue_brun.9942b815.webp",
+    rogue_girl_deina: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/rogue_girl_deina.21114ad4.webp",
+    scientist_arvin_pottery_jr: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/scientist_arvin_pottery_jr.26d21bdc.webp",
+    white_mage: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/white_mage.c38dbedf.webp",
   };
   // --- конец блока ---
 
