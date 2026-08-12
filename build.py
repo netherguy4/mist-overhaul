@@ -5,11 +5,11 @@
 кадры вкладываются обратно в апскейл (мягкая растушёвка по бокам) — итоговая
 картинка совпадает по кадрированию и пропорциям с оригиналом из игры.
 """
+import hashlib
 import json
 import re
 import shutil
 import subprocess
-import sys
 import time
 from pathlib import Path
 
@@ -26,12 +26,11 @@ REPO = "netherguy4/mist-overhaul"
 # Откуда Tampermonkey заберёт портреты при установке и обновлении скрипта.
 # Дальше они живут у него локально, в игру за ними никто не ходит.
 #
-# Ссылка прибита к коммиту, в котором эта картинка менялась в последний раз.
-# Два следствия: путь для jsDelivr неизменяем и устаревший файл прийти не может
-# (на ветке @main кеш живёт до 12 часов, а purge.jsdelivr.net отрабатывает
-# через раз), и у нетронутых портретов ссылка не меняется — Tampermonkey
-# перекачивает только то, что действительно поменялось.
-HOST = f"https://cdn.jsdelivr.net/gh/{REPO}@{{ref}}/extension/npc"
+# В имени файла лежит хеш его содержимого, поэтому адрес самоинвалидируется:
+# поменялась картинка — поменялось имя, и мимо любого кеша приходит новая.
+# Не поменялась — адрес прежний, и качать нечего. Ветка тут безопасна: под
+# одним и тем же адресом никогда не окажется другое содержимое.
+HOST = f"https://cdn.jsdelivr.net/gh/{REPO}@main/extension/npc"
 
 OUT_H = 534          # 2x от игровых 181x267
 FPS = 24
@@ -94,10 +93,26 @@ def dims(path: Path):
     return (int(x) for x in probe.stdout.decode().strip().split(","))
 
 
+def built(name: str):
+    """Готовый файл персонажа: <имя>.<хеш>.webp, если он уже собран."""
+    return next(EXT_NPC.glob(f"{name}.*.webp"), None)
+
+
 def fresh(name: str, src: Path):
     """Готовый webp новее исходника — пересобирать нечего (прогон видео ~2 мин)."""
-    webp = EXT_NPC / f"{name}.webp"
-    return webp.exists() and webp.stat().st_mtime > src.stat().st_mtime
+    webp = built(name)
+    return webp is not None and webp.stat().st_mtime > src.stat().st_mtime
+
+
+def finalize(name: str, tmp: Path):
+    """Переименовать в <имя>.<хеш содержимого>.webp, старые версии убрать."""
+    digest = hashlib.sha256(tmp.read_bytes()).hexdigest()[:8]
+    final = EXT_NPC / f"{name}.{digest}.webp"
+    for old in EXT_NPC.glob(f"{name}.*.webp"):
+        if old != final and old != tmp:
+            old.unlink()
+    tmp.replace(final)
+    return final
 
 
 def build(video: Path, still: Path, name: str):
@@ -142,12 +157,13 @@ def build(video: Path, still: Path, name: str):
          "-c:v", "ffv1", str(mkv)], input=canvas.tobytes())
 
     EXT_NPC.mkdir(parents=True, exist_ok=True)
-    webp = EXT_NPC / f"{name}.webp"
+    webp = EXT_NPC / f"{name}.tmp"
     # картинки лежат у игрока локально, экономить нечего: 95 — колено кривой
     # качества (40.4 dB против 36.0 на 82), выше растёт только вес
     run(["ffmpeg", "-v", "error", "-y", "-i", str(mkv), "-loop", "0",
          "-c:v", "libwebp_anim", "-pix_fmt", "yuv420p", "-preset", "picture",
-         "-q:v", "95", "-compression_level", "6", str(webp)])
+         "-q:v", "95", "-compression_level", "6", "-f", "webp", str(webp)])
+    webp = finalize(name, webp)
 
     GIF.mkdir(exist_ok=True)
     gif = GIF / f"{name}.gif"
@@ -168,11 +184,12 @@ def build_still(still: Path, original: Path, name: str):
         return name
     ow, oh = dims(original)
     out_w = round(OUT_H * ow / oh) // 2 * 2
-    webp = EXT_NPC / f"{name}.webp"
+    webp = EXT_NPC / f"{name}.tmp"
     EXT_NPC.mkdir(parents=True, exist_ok=True)
     # один кадр весит копейки, поэтому без потерь вовсе
     run(["ffmpeg", "-v", "error", "-y", "-i", str(still),
-         "-vf", f"scale={out_w}:{OUT_H}", "-lossless", "1", str(webp)])
+         "-vf", f"scale={out_w}:{OUT_H}", "-lossless", "1", "-f", "webp", str(webp)])
+    webp = finalize(name, webp)
     print(f"== {name}: статика {out_w}x{OUT_H}, {webp.stat().st_size / 1e3:.0f} KB")
     return name
 
@@ -193,50 +210,35 @@ def main():
         "id": i,
         "priority": 1,
         "action": {"type": "redirect",
-                   "redirect": {"extensionPath": f"/npc/{n}.webp"}},
+                   "redirect": {"extensionPath": f"/npc/{built(n).name}"}},
         "condition": {"urlFilter": f"||i.mist-game.ru/npc/{n}.jpg",
                       "resourceTypes": ["image"]},
     } for i, n in enumerate(sorted(names), 1)]
     (ROOT / "extension" / "rules.json").write_text(
         json.dumps(rules, indent=2, ensure_ascii=False) + "\n")
+    write_userscript(sorted(names))
     print(f"\nrules.json: {len(rules)} персонажей")
     shutil.rmtree(WORK, ignore_errors=True)
-    # шапку юзерскрипта проставляет отдельный шаг: ссылки прибиваются к коммитам
-    # картинок, а их к этому моменту ещё нет — этим занимается publish.sh
-    if "--pin" in sys.argv:
-        write_userscript(sorted(names))
 
 
 def write_userscript(names):
-    """Проставить в юзерскрипте список @resource и версию.
+    """Проставить в юзерскрипте ссылки на портреты и версию.
 
-    Tampermonkey перекачивает картинки только при смене версии скрипта, поэтому
-    версия — время самого свежего портрета: монотонно растёт и сразу видно,
-    насколько свежая установка.
+    Версия — время сборки: растёт всегда, поэтому Tampermonkey замечает
+    обновление даже когда поменялся только код. Картинки к версии скрипта не
+    привязаны, у них своя инвалидация — хеш в имени файла.
     """
     path = ROOT / "mist-overhaul.user.js"
     version = time.strftime("%Y.%m.%d.%H%M")
 
-    def pin(n):
-        rel = f"extension/npc/{n}.webp"
-        dirty = run(["git", "status", "--porcelain", "--", rel], cwd=ROOT).stdout
-        if dirty:
-            raise SystemExit(f"{rel} не закоммичен — ссылку не на что прибить.\n"
-                             "Запускать через ./publish.sh, он коммитит картинки "
-                             "до простановки ссылок.")
-        return run(["git", "log", "-1", "--format=%H", "--", rel],
-                   cwd=ROOT).stdout.decode().strip()
-
-    block = "\n".join(
-        f"// @resource     {n} {HOST.format(ref=pin(n))}/{n}.webp" for n in names)
+    urls = ",\n".join(f'    {n}: "{HOST}/{built(n).name}"' for n in names)
     text = re.sub(r"^// @version.*$", f"// @version      {version}",
                   path.read_text(), count=1, flags=re.M)
-    text = re.sub(r"^// --- портреты.*?(?=^// ==/UserScript==)",
-                  f"// --- портреты, дальше до конца блока правит build.py, "
-                  f"руками не трогать ---\n{block}\n",
+    text = re.sub(r"^(  // --- ссылки на портреты.*?---\n).*?(?=^  // --- конец блока)",
+                  lambda m: f"{m.group(1)}  const URLS = {{\n{urls},\n  }};\n",
                   text, count=1, flags=re.M | re.S)
     path.write_text(text)
-    print(f"юзерскрипт: версия {version}, {len(names)} @resource")
+    print(f"юзерскрипт: версия {version}, {len(names)} ссылок")
 
 
 if __name__ == "__main__":

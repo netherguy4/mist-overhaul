@@ -1,56 +1,64 @@
 // ==UserScript==
 // @name         Mist Overhaul
 // @namespace    https://github.com/netherguy4/mist-overhaul
-// @version      2026.08.12.1651
+// @version      2026.08.12.1710
 // @description  Анимированные портреты персонажей в Mist
 // @author       nether
 // @match        *://*.mist-game.ru/*
 // @run-at       document-start
-// @grant        GM_getResourceURL
+// @grant        none
 // сам скрипт берётся с raw.githubusercontent: кеш ~5 минут против 12 часов
-// у jsDelivr на ветке, а вес крошечный. Картинки — с CDN, но по тегу версии.
+// у jsDelivr на ветке, а вес крошечный
 // @updateURL    https://raw.githubusercontent.com/netherguy4/mist-overhaul/main/mist-overhaul.user.js
 // @downloadURL  https://raw.githubusercontent.com/netherguy4/mist-overhaul/main/mist-overhaul.user.js
-// --- портреты, дальше до конца блока правит build.py, руками не трогать ---
-// @resource     bride_amalia_milton_8thmarch https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@febc189ed589bc64e14cd9cc3525cee84d53c68c/extension/npc/bride_amalia_milton_8thmarch.webp
-// @resource     caravaneer https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@febc189ed589bc64e14cd9cc3525cee84d53c68c/extension/npc/caravaneer.webp
-// @resource     corvin https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@febc189ed589bc64e14cd9cc3525cee84d53c68c/extension/npc/corvin.webp
-// @resource     cpt_tirim_mormont https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@febc189ed589bc64e14cd9cc3525cee84d53c68c/extension/npc/cpt_tirim_mormont.webp
-// @resource     demandred https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@febc189ed589bc64e14cd9cc3525cee84d53c68c/extension/npc/demandred.webp
-// @resource     ghost_boss_traun https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@febc189ed589bc64e14cd9cc3525cee84d53c68c/extension/npc/ghost_boss_traun.webp
-// @resource     ghost_simon_kornish https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@febc189ed589bc64e14cd9cc3525cee84d53c68c/extension/npc/ghost_simon_kornish.webp
-// @resource     guild_violett_tari https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@febc189ed589bc64e14cd9cc3525cee84d53c68c/extension/npc/guild_violett_tari.webp
-// @resource     ifrit https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@febc189ed589bc64e14cd9cc3525cee84d53c68c/extension/npc/ifrit.webp
-// @resource     indiana_lester https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@febc189ed589bc64e14cd9cc3525cee84d53c68c/extension/npc/indiana_lester.webp
-// @resource     innkeeper https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@febc189ed589bc64e14cd9cc3525cee84d53c68c/extension/npc/innkeeper.webp
-// @resource     lumberjack https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@febc189ed589bc64e14cd9cc3525cee84d53c68c/extension/npc/lumberjack.webp
-// @resource     oracle https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@febc189ed589bc64e14cd9cc3525cee84d53c68c/extension/npc/oracle.webp
-// @resource     overseas_koitira https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@febc189ed589bc64e14cd9cc3525cee84d53c68c/extension/npc/overseas_koitira.webp
-// @resource     poacher_vargo https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@febc189ed589bc64e14cd9cc3525cee84d53c68c/extension/npc/poacher_vargo.webp
-// @resource     postman https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@febc189ed589bc64e14cd9cc3525cee84d53c68c/extension/npc/postman.webp
-// @resource     prisoner_toivo_beilish https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@febc189ed589bc64e14cd9cc3525cee84d53c68c/extension/npc/prisoner_toivo_beilish.webp
-// @resource     rogue_boss_eshtar https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@febc189ed589bc64e14cd9cc3525cee84d53c68c/extension/npc/rogue_boss_eshtar.webp
-// @resource     rogue_brun https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@febc189ed589bc64e14cd9cc3525cee84d53c68c/extension/npc/rogue_brun.webp
-// @resource     rogue_girl_deina https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@febc189ed589bc64e14cd9cc3525cee84d53c68c/extension/npc/rogue_girl_deina.webp
-// @resource     scientist_arvin_pottery_jr https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@febc189ed589bc64e14cd9cc3525cee84d53c68c/extension/npc/scientist_arvin_pottery_jr.webp
-// @resource     white_mage https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@febc189ed589bc64e14cd9cc3525cee84d53c68c/extension/npc/white_mage.webp
 // ==/UserScript==
 
 (() => {
   'use strict';
 
-  // Картинки лежат локально: Tampermonkey скачал их по @resource при установке
-  // и обновит только вместе со скриптом. В игру за ними никто не ходит.
+  // Портреты не через @resource: Tampermonkey держал их с первой установки и не
+  // перекачивал даже после смены ссылок. Обычный url() надёжнее и вдобавок
+  // ленивый — качается только тот персонаж, которого встретил. Адрес прибит к
+  // коммиту, а такие пути jsDelivr отдаёт с immutable-кешем: за картинкой
+  // сходят ровно один раз, а новая версия приезжает вместе с новым адресом.
+
+  // --- ссылки на портреты, дальше до конца блока правит build.py ---
+  const URLS = {
+    bride_amalia_milton_8thmarch: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/bride_amalia_milton_8thmarch.a9b4fe87.webp",
+    caravaneer: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/caravaneer.30518e4e.webp",
+    corvin: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/corvin.7a5385be.webp",
+    cpt_tirim_mormont: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/cpt_tirim_mormont.34dd6931.webp",
+    demandred: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/demandred.e9d423c6.webp",
+    ghost_boss_traun: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/ghost_boss_traun.9bc6cb3f.webp",
+    ghost_simon_kornish: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/ghost_simon_kornish.ebfe3d4d.webp",
+    guild_violett_tari: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/guild_violett_tari.06ff7579.webp",
+    ifrit: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/ifrit.294608b3.webp",
+    indiana_lester: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/indiana_lester.88391638.webp",
+    innkeeper: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/innkeeper.7d53e6d9.webp",
+    lumberjack: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/lumberjack.18128d81.webp",
+    oracle: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/oracle.e3b195e3.webp",
+    overseas_koitira: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/overseas_koitira.53bd8115.webp",
+    poacher_vargo: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/poacher_vargo.ada88acc.webp",
+    postman: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/postman.3707b1b1.webp",
+    prisoner_toivo_beilish: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/prisoner_toivo_beilish.38da288f.webp",
+    rogue_boss_eshtar: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/rogue_boss_eshtar.c85fc95b.webp",
+    rogue_brun: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/rogue_brun.87712dec.webp",
+    rogue_girl_deina: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/rogue_girl_deina.5adb079c.webp",
+    scientist_arvin_pottery_jr: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/scientist_arvin_pottery_jr.fcd7a9e1.webp",
+    white_mage: "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/white_mage.920aa351.webp",
+  };
+  // --- конец блока ---
+
   const NPC = /\/npc\/([a-z0-9_]+)\.(?:jpe?g|png)/i;
-  const local = name => { try { return GM_getResourceURL(name); } catch { return null; } };
 
   function swapBg(el) {
     const cur = getComputedStyle(el).backgroundImage;
     const name = cur.match(NPC)?.[1];
     if (!name || el.dataset.mistOverhaul === name) return;
-    const url = local(name);
+    const url = URLS[name];
     if (!url) return;                 // персонажа ещё не рисовали — остаётся оригинал
     el.dataset.mistOverhaul = name;
+    // оригинал нижним слоем: пока портрет качается, видно его, а не пустоту
     el.style.backgroundImage = `url(${url}), ${cur}`;
     // в игре стоит background-size: auto, а наши картинки вдвое крупнее
     el.style.backgroundSize = '100% 100%';
@@ -60,9 +68,11 @@
   function swapImg(img) {
     const name = img.src.match(NPC)?.[1];
     if (!name || img.dataset.mistOverhaul === name) return;
-    const url = local(name);
+    const url = URLS[name];
     if (!url) return;
     img.dataset.mistOverhaul = name;
+    const original = img.src;
+    img.addEventListener('error', () => { img.src = original; }, { once: true });
     img.src = url;
   }
 

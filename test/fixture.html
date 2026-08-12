@@ -1,7 +1,6 @@
 <!doctype html><meta charset=utf-8><title>Mist Overhaul — проверка юзерскрипта</title>
-<!-- Открыть файл в браузере: должно быть четыре PASS. Проверяется логика подмены,
-     картинки не грузятся — GM_getResourceURL подменён заглушкой. -->
-<script>window.GM_getResourceURL = name => `https://stub.local/${name}.webp`;</script>
+<!-- Отдать по http (на file:// не поедет <script src>) и открыть: четыре PASS.
+     Проверяется логика подмены; сами картинки грузить не обязательно. -->
 <script src="../mist-overhaul.user.js"></script>
 
 <div id="host"></div>
@@ -18,14 +17,14 @@ const bg = () => getComputedStyle(host.firstElementChild).backgroundImage;
 
 put('caravaneer');
 setTimeout(() => {
-  check('портрет подменён', /stub\.local\/caravaneer\.webp/.test(bg()));
+  check('портрет подменён', /cdn\.jsdelivr\.net\/.*\/caravaneer\.[0-9a-f]+\.webp/.test(bg()));
   check('оригинал остался запасным слоем', /i\.mist-game\.ru\/npc\/caravaneer\.jpg/.test(bg()));
   // слоёв два, поэтому computed-значение повторяется под каждый
   check('масштаб под картинку 2x',
         /^(100% 100%)(, \1)*$/.test(getComputedStyle(host.firstElementChild).backgroundSize));
   put('ifrit');                       // игра меняет персонажа без перезагрузки
   setTimeout(() => {
-    check('смена персонажа подхвачена', /stub\.local\/ifrit\.webp/.test(bg()));
+    check('смена персонажа подхвачена', /cdn\.jsdelivr\.net\/.*\/ifrit\.[0-9a-f]+\.webp/.test(bg()));
     document.getElementById('out').textContent = log.join('\n');
   }, 200);
 }, 200);
