@@ -19,11 +19,9 @@ git diff --cached --quiet || git commit -q -m "$msg"
 
 .venv/bin/python build.py --pin
 git add -A
-if git diff --cached --quiet; then
-  echo "нечего публиковать"
-  exit 0
-fi
-git commit -q -m "$msg: ссылки на картинки"
-git push
+# шапка могла не измениться (правка только в коде или в доках) — это не повод
+# не пушить: первый коммит уже сделан и без push останется лежать локально
+git diff --cached --quiet || git commit -q -m "$msg: ссылки на картинки"
+git diff --quiet origin/main HEAD || git push
 
 echo "опубликовано $(grep -m1 '^// @version' mist-overhaul.user.js | awk '{print $3}')"
