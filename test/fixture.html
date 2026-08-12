@@ -29,3 +29,13 @@ setTimeout(() => {
   }, 200);
 }, 200);
 </script>
+
+<script>
+// пятая проверка: все 22 портрета запрошены сразу, не по одному по мере встречи
+addEventListener('load', () => setTimeout(() => {
+  const n = performance.getEntriesByType('resource')
+    .filter(e => /cdn\.jsdelivr\.net\/.*\.webp$/.test(e.name)).length;
+  document.getElementById('out').textContent +=
+    '\n' + (n >= 22 ? 'PASS ' : 'FAIL ') + `предзагрузка всех портретов (запрошено ${n})`;
+}, 3000));
+</script>

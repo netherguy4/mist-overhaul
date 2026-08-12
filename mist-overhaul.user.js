@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mist Overhaul
 // @namespace    https://github.com/netherguy4/mist-overhaul
-// @version      2026.08.12.1713
+// @version      2026.08.12.1718
 // @description  Анимированные портреты персонажей в Mist
 // @author       nether
 // @match        *://*.mist-game.ru/*
@@ -97,4 +97,12 @@
 
   scan(document);
   document.addEventListener('DOMContentLoaded', () => scan(document));
+
+  // Все портреты тянем сразу, не дожидаясь встречи с персонажем. Адреса
+  // неизменяемы (хеш в имени), поэтому jsDelivr отдаёт их с вечным кешем:
+  // сеть работает один раз, дальше всё берётся с диска. Ждём load, чтобы не
+  // отбирать канал у самой игры.
+  addEventListener('load', () => {
+    for (const url of Object.values(URLS)) new Image().src = url;
+  });
 })();
