@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-"""Видео NPC -> бесшовно зациклённая анимация (webp + gif) + rules.json расширения.
+"""Видео NPC -> бесшовно зациклённая анимация VP9 + ссылки для юзерскрипта.
 
-Видео сгенерированы как центральный кроп 9:16 из Upscaled/<name>.png, поэтому
-кадры вкладываются обратно в апскейл (мягкая растушёвка по бокам) — итоговая
-картинка совпадает по кадрированию и пропорциям с оригиналом из игры.
+Генератор отдаёт 9:16 двумя способами. Если портрет целиком, а сверху и снизу
+чёрные поля, они срезаются — получается кадрирование оригинала. Если это
+центральный кроп, кадры вкладываются обратно в апскейл с растушёвкой по бокам;
+такой вариант хуже: генератор перерисовывает детали, и середина заметно
+расходится с нетронутыми краями.
 """
 import hashlib
 import json
 import re
-import shutil
 import subprocess
 import time
 from pathlib import Path
@@ -17,9 +18,7 @@ import numpy as np
 
 ROOT = Path(__file__).parent
 SRC = ROOT / "Mist characters"
-WORK = ROOT / "work"
 EXT_NPC = ROOT / "extension" / "npc"
-GIF = ROOT / "gif"
 
 REPO = "netherguy4/mist-overhaul"
 
@@ -37,10 +36,10 @@ FPS = 24
 MIN_LOOP = 96        # >= 4 c
 XFADE = 10           # кадров растушёвки шва
 FEATHER = 18         # px растушёвки боковых стыков с апскейлом
+BAR = 10             # яркость, ниже которой строка кадра считается чёрным полем
 
 # имена файлов у генератора видео потерялись
 ALIASES = {
-    "Animate_image_into_idle_loop_202608120009": "bride_amalia_milton_8thmarch",
     "Animate_source_image_idle_loop_202608120008": "ifrit",
 }
 
@@ -93,9 +92,22 @@ def dims(path: Path):
     return (int(x) for x in probe.stdout.decode().strip().split(","))
 
 
+def content_box(video: Path, vw: int, vh: int):
+    """Границы картинки внутри кадра: генератор кладёт её в 9:16 с чёрными полями."""
+    g = raw(["-i", str(video), "-vf", "format=gray", "-frames:v", "1", "-pix_fmt", "gray"],
+            vw, vh, 1)[0, :, :, 0].astype(np.float32)
+    rows, cols = g.mean(1), g.mean(0)
+    top = int(np.argmax(rows > BAR)); bot = vh - int(np.argmax(rows[::-1] > BAR))
+    left = int(np.argmax(cols > BAR)); right = vw - int(np.argmax(cols[::-1] > BAR))
+    # поля меньше процента считаем шумом, а не полями
+    if top + (vh - bot) < vh * 0.01: top, bot = 0, vh
+    if left + (vw - right) < vw * 0.01: left, right = 0, vw
+    return left, top, right - left, bot - top
+
+
 def built(name: str):
-    """Готовый файл персонажа: <имя>.<хеш>.webp, если он уже собран."""
-    return next(EXT_NPC.glob(f"{name}.*.webp"), None)
+    """Готовый файл персонажа: <имя>.<хеш>.webm|webp, если он уже собран."""
+    return next(EXT_NPC.glob(f"{name}.*.web[mp]"), None)
 
 
 def fresh(name: str, src: Path):
@@ -104,76 +116,79 @@ def fresh(name: str, src: Path):
     return webp is not None and webp.stat().st_mtime > src.stat().st_mtime
 
 
-def finalize(name: str, tmp: Path):
-    """Переименовать в <имя>.<хеш содержимого>.webp, старые версии убрать."""
+def finalize(name: str, tmp: Path, ext: str):
+    """Переименовать в <имя>.<хеш содержимого>.<ext>, старые версии убрать."""
     digest = hashlib.sha256(tmp.read_bytes()).hexdigest()[:8]
-    final = EXT_NPC / f"{name}.{digest}.webp"
-    for old in EXT_NPC.glob(f"{name}.*.webp"):
+    final = EXT_NPC / f"{name}.{digest}.{ext}"
+    for old in EXT_NPC.glob(f"{name}.*.web[mp]"):
         if old != final and old != tmp:
             old.unlink()
     tmp.replace(final)
     return final
 
 
-def build(video: Path, still: Path, name: str):
+def build(video: Path, still: Path, original: Path, name: str):
     if fresh(name, video):
         print(f"== {name}: уже собран")
         return name
     print(f"\n== {name}")
-    sw, sh = dims(still)
+    ow, oh = dims(original)
+    vw, vh = dims(video)
+    out_w = round(OUT_H * ow / oh) // 2 * 2
 
-    out_w = round(sw * OUT_H / sh) // 2 * 2
-    vid_w = round(sh * 720 / 1280 * OUT_H / sh) // 2 * 2   # ширина кропа 9:16 в выходном масштабе
+    cx, cy, cw, ch = content_box(video, vw, vh)
+    crop = f"crop={cw}:{ch}:{cx}:{cy}," if (cw, ch) != (vw, vh) else ""
+    if crop:
+        print(f"   чёрные поля срезаны: {vw}x{vh} -> {cw}x{ch}")
+    vw, vh = cw, ch
+
+    # Видео, снятое сразу в пропорциях игры, вкладывать в апскейл не нужно:
+    # именно склейка перерисованной генератором середины с нетронутыми краями
+    # и даёт заметный стык. Старые видео — кроп 9:16, для них склейка остаётся.
+    native = abs(vw / vh - ow / oh) < 0.02
+    vid_w = out_w if native else round(0.5625 * OUT_H) // 2 * 2
     x0 = (out_w - vid_w) // 2
 
-    gray = raw(["-i", str(video), "-vf", "scale=64:114,format=gray", "-pix_fmt", "gray"],
+    gray = raw(["-i", str(video), "-vf", f"{crop}scale=64:114,format=gray", "-pix_fmt", "gray"],
                64, 114, 1)
     (cost, s, L), best = find_loop(gray)
     print(f"   петля: кадры {s}..{s + L} ({L} кадров, {L / FPS:.2f} c), "
           f"шов {cost:.2f} (лучший возможный {best:.2f})")
 
-    frames = raw(["-i", str(video), "-vf", f"scale={vid_w}:{OUT_H}", "-pix_fmt", "rgb24"],
+    frames = raw(["-i", str(video), "-vf", f"{crop}scale={vid_w}:{OUT_H}", "-pix_fmt", "rgb24"],
                  vid_w, OUT_H, 3)
     loop = crossfade(frames, s, L)
 
-    base = raw(["-i", str(still), "-vf", f"scale={out_w}:{OUT_H}", "-pix_fmt", "rgb24"],
-               out_w, OUT_H, 3)[0]
+    if native:
+        canvas = loop
+    else:
+        base = raw(["-i", str(still), "-vf", f"scale={out_w}:{OUT_H}", "-pix_fmt", "rgb24"],
+                   out_w, OUT_H, 3)[0]
+        # растушёвка стыка видео с апскейлом по боковым краям
+        alpha = np.ones(vid_w, np.float32)
+        ramp = np.linspace(0, 1, FEATHER, endpoint=False, dtype=np.float32)
+        alpha[:FEATHER], alpha[-FEATHER:] = ramp, ramp[::-1]
+        alpha = alpha[None, None, :, None]
 
-    # растушёвка стыка видео с апскейлом по боковым краям
-    alpha = np.ones(vid_w, np.float32)
-    ramp = np.linspace(0, 1, FEATHER, endpoint=False, dtype=np.float32)
-    alpha[:FEATHER], alpha[-FEATHER:] = ramp, ramp[::-1]
-    alpha = alpha[None, None, :, None]
-
-    canvas = np.repeat(base[None], L, 0).astype(np.float32)
-    region = canvas[:, :, x0:x0 + vid_w]
-    canvas[:, :, x0:x0 + vid_w] = alpha * loop + (1 - alpha) * region
-    canvas = np.clip(canvas, 0, 255).astype(np.uint8)
-
-    WORK.mkdir(exist_ok=True)
-    mkv = WORK / f"{name}.mkv"
-    run(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24",
-         "-s", f"{out_w}x{OUT_H}", "-r", str(FPS), "-i", "-",
-         "-c:v", "ffv1", str(mkv)], input=canvas.tobytes())
+        canvas = np.repeat(base[None], L, 0).astype(np.float32)
+        region = canvas[:, :, x0:x0 + vid_w]
+        canvas[:, :, x0:x0 + vid_w] = alpha * loop + (1 - alpha) * region
+        canvas = np.clip(canvas, 0, 255).astype(np.uint8)
+        print(f"   видео 9:16 -> вложено в апскейл, стык растушёван {FEATHER} px")
 
     EXT_NPC.mkdir(parents=True, exist_ok=True)
-    webp = EXT_NPC / f"{name}.tmp"
-    # картинки лежат у игрока локально, экономить нечего: 95 — колено кривой
-    # качества (40.4 dB против 36.0 на 82), выше растёт только вес
-    run(["ffmpeg", "-v", "error", "-y", "-i", str(mkv), "-loop", "0",
-         "-c:v", "libwebp_anim", "-pix_fmt", "yuv420p", "-preset", "picture",
-         "-q:v", "95", "-compression_level", "6", "-f", "webp", str(webp)])
-    webp = finalize(name, webp)
+    out = EXT_NPC / f"{name}.tmp"
+    # VP9, а не animated webp: тот жмёт покадровой разницей, без компенсации
+    # движения, и на том же качестве весит в 2.5 раза больше (10.2 против 4.0 МБ
+    # у Амалии при 44.4 против 44.4 dB). Плюс видео декодируется аппаратно.
+    run(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24",
+         "-s", f"{out_w}x{OUT_H}", "-r", str(FPS), "-i", "-",
+         "-c:v", "libvpx-vp9", "-crf", "24", "-b:v", "0", "-row-mt", "1",
+         "-pix_fmt", "yuv420p", "-an", "-f", "webm", str(out)],
+        input=canvas.tobytes())
+    out = finalize(name, out, "webm")
 
-    GIF.mkdir(exist_ok=True)
-    gif = GIF / f"{name}.gif"
-    run(["ffmpeg", "-v", "error", "-y", "-i", str(mkv), "-filter_complex",
-         "[0:v]split[a][b];[a]palettegen=max_colors=256:stats_mode=full[p];"
-         "[b][p]paletteuse=dither=sierra2_4a:diff_mode=rectangle",
-         "-loop", "0", str(gif)])
-
-    print(f"   {out_w}x{OUT_H}  webp {webp.stat().st_size / 1e6:.2f} MB   "
-          f"gif {gif.stat().st_size / 1e6:.2f} MB")
+    print(f"   {out_w}x{OUT_H}  webm {out.stat().st_size / 1e6:.2f} MB")
     return name
 
 
@@ -189,7 +204,7 @@ def build_still(still: Path, original: Path, name: str):
     # один кадр весит копейки, поэтому без потерь вовсе
     run(["ffmpeg", "-v", "error", "-y", "-i", str(still),
          "-vf", f"scale={out_w}:{OUT_H}", "-lossless", "1", "-f", "webp", str(webp)])
-    webp = finalize(name, webp)
+    webp = finalize(name, webp, "webp")
     print(f"== {name}: статика {out_w}x{OUT_H}, {webp.stat().st_size / 1e3:.0f} KB")
     return name
 
@@ -203,7 +218,7 @@ def main():
         if still is None:
             print(f"!! нет апскейла для {name}, пропуск")
             continue
-        names.append(build(videos[name], still, name) if name in videos
+        names.append(build(videos[name], still, original, name) if name in videos
                      else build_still(still, original, name))
 
     rules = [{
@@ -218,7 +233,6 @@ def main():
         json.dumps(rules, indent=2, ensure_ascii=False) + "\n")
     write_userscript(sorted(names))
     print(f"\nrules.json: {len(rules)} персонажей")
-    shutil.rmtree(WORK, ignore_errors=True)
 
 
 def write_userscript(names):

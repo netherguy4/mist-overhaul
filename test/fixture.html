@@ -25,9 +25,9 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 (async () => {
   put('caravaneer');
   await sleep(300);
-  // адрес бывает и blob: из хранилища, и прямой с CDN — важен факт подмены
+  // анимация — это <video> поверх, статика — второй слой фона
   check('портрет подменён', el().dataset.mistOverhaul === 'caravaneer'
-        && css('backgroundImage').split(/,(?=\s*url)/).length === 2);
+        && !!el().querySelector('video.mist-overhaul'));
   check('оригинал остался запасным слоем',
         /i\.mist-game\.ru\/npc\/caravaneer\.jpg/.test(css('backgroundImage')));
   // слоёв два, поэтому computed-значение повторяется под каждый
@@ -35,7 +35,8 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
 
   put('ifrit');                       // игра меняет персонажа без перезагрузки
   await sleep(300);
-  check('смена персонажа подхвачена', el().dataset.mistOverhaul === 'ifrit');
+  check('смена персонажа подхвачена', el().dataset.mistOverhaul === 'ifrit'
+        && el().querySelectorAll('video.mist-overhaul').length === 1);
 
   // портреты должны лечь в хранилище сами, без встречи с персонажем
   let n = 0;

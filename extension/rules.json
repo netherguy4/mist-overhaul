@@ -5,7 +5,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/bride_amalia_milton_8thmarch.a9b4fe87.webp"
+        "extensionPath": "/npc/bride_amalia_milton_8thmarch.a40ee135.webm"
       }
     },
     "condition": {
@@ -21,7 +21,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/caravaneer.30518e4e.webp"
+        "extensionPath": "/npc/caravaneer.ac8e5936.webm"
       }
     },
     "condition": {
@@ -53,7 +53,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/cpt_tirim_mormont.34dd6931.webp"
+        "extensionPath": "/npc/cpt_tirim_mormont.a5c45491.webm"
       }
     },
     "condition": {
@@ -133,7 +133,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/ifrit.294608b3.webp"
+        "extensionPath": "/npc/ifrit.e40a8eb3.webm"
       }
     },
     "condition": {
@@ -341,7 +341,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/white_mage.920aa351.webp"
+        "extensionPath": "/npc/white_mage.49a5be2a.webm"
       }
     },
     "condition": {
