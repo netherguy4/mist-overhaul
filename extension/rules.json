@@ -5,7 +5,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/bride_amalia_milton_8thmarch.413c5125.webm"
+        "extensionPath": "/npc/3x/bride_amalia_milton_8thmarch.5b7812c2.webm"
       }
     },
     "condition": {
@@ -21,7 +21,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/caravaneer.a7985f66.webp"
+        "extensionPath": "/npc/3x/caravaneer.df3be187.webp"
       }
     },
     "condition": {
@@ -37,7 +37,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/corvin.be8f8927.webp"
+        "extensionPath": "/npc/3x/corvin.bf3fed7f.webp"
       }
     },
     "condition": {
@@ -53,7 +53,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/cpt_tirim_mormont.2b975809.webp"
+        "extensionPath": "/npc/3x/cpt_tirim_mormont.5fe81384.webp"
       }
     },
     "condition": {
@@ -69,7 +69,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/demandred.2706d5a4.webp"
+        "extensionPath": "/npc/3x/demandred.f61e2f92.webp"
       }
     },
     "condition": {
@@ -85,7 +85,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/ghost_boss_traun.94cdbff9.webp"
+        "extensionPath": "/npc/3x/ghost_boss_traun.8155df8d.webp"
       }
     },
     "condition": {
@@ -101,7 +101,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/ghost_simon_kornish.ee85a3ee.webp"
+        "extensionPath": "/npc/3x/ghost_simon_kornish.a97aea42.webp"
       }
     },
     "condition": {
@@ -117,7 +117,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/guild_violett_tari.d45dd6d5.webp"
+        "extensionPath": "/npc/3x/guild_violett_tari.be0f55eb.webp"
       }
     },
     "condition": {
@@ -133,7 +133,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/ifrit.c8f1d842.webp"
+        "extensionPath": "/npc/3x/ifrit.1f11e127.webp"
       }
     },
     "condition": {
@@ -149,7 +149,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/indiana_lester.1a3e47be.webp"
+        "extensionPath": "/npc/3x/indiana_lester.55dad1d2.webp"
       }
     },
     "condition": {
@@ -165,7 +165,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/innkeeper.2b745fa5.webp"
+        "extensionPath": "/npc/3x/innkeeper.cff3773d.webp"
       }
     },
     "condition": {
@@ -181,7 +181,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/lumberjack.7cdf6d49.webp"
+        "extensionPath": "/npc/3x/lumberjack.a9c9d041.webp"
       }
     },
     "condition": {
@@ -197,7 +197,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/oracle.4f4236f0.webp"
+        "extensionPath": "/npc/3x/oracle.b48931d6.webp"
       }
     },
     "condition": {
@@ -213,7 +213,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/overseas_koitira.b4dabb53.webp"
+        "extensionPath": "/npc/3x/overseas_koitira.4176e79e.webp"
       }
     },
     "condition": {
@@ -229,7 +229,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/poacher_vargo.07f14792.webp"
+        "extensionPath": "/npc/3x/poacher_vargo.b553b3b2.webp"
       }
     },
     "condition": {
@@ -245,7 +245,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/postman.bf42d710.webp"
+        "extensionPath": "/npc/3x/postman.c4b73980.webp"
       }
     },
     "condition": {
@@ -261,7 +261,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/prisoner_toivo_beilish.d5f8cf9a.webp"
+        "extensionPath": "/npc/3x/prisoner_toivo_beilish.b7e22af7.webp"
       }
     },
     "condition": {
@@ -277,7 +277,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/rogue_boss_eshtar.b60c9191.webp"
+        "extensionPath": "/npc/3x/rogue_boss_eshtar.5fd83653.webp"
       }
     },
     "condition": {
@@ -293,7 +293,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/rogue_brun.9942b815.webp"
+        "extensionPath": "/npc/3x/rogue_brun.99500840.webp"
       }
     },
     "condition": {
@@ -309,7 +309,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/rogue_girl_deina.21114ad4.webp"
+        "extensionPath": "/npc/3x/rogue_girl_deina.898102bd.webp"
       }
     },
     "condition": {
@@ -325,7 +325,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/scientist_arvin_pottery_jr.26d21bdc.webp"
+        "extensionPath": "/npc/3x/scientist_arvin_pottery_jr.9baa2dab.webp"
       }
     },
     "condition": {
@@ -341,7 +341,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/white_mage.c38dbedf.webp"
+        "extensionPath": "/npc/3x/white_mage.ee2d73db.webp"
       }
     },
     "condition": {

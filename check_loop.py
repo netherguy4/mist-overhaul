@@ -10,7 +10,7 @@ from pathlib import Path
 import numpy as np
 
 n = 0
-for f in sorted((Path(__file__).parent / "extension" / "npc").glob("*.webm")):
+for f in sorted((Path(__file__).parent / "extension" / "npc").glob("3x/*.webm")):
     out = subprocess.run(
         ["ffmpeg", "-v", "error", "-i", str(f), "-vf", "scale=64:94,format=gray",
          "-pix_fmt", "gray", "-f", "rawvideo", "-"],

@@ -31,7 +31,10 @@ REPO = "netherguy4/mist-overhaul"
 # одним и тем же адресом никогда не окажется другое содержимое.
 HOST = f"https://cdn.jsdelivr.net/gh/{REPO}@main/extension/npc"
 
-OUT_H = 800          # 3x от игровых 181x267: игра рисовалась до high-dpi
+# Игровая рамка портрета — 181x267 CSS-пикселей. Отдаём три размера и выбираем
+# по devicePixelRatio: на обычном экране 3x пришлось бы ужимать втрое, и фильтр
+# браузера превращал мелкие детали в кашу. Каждый клиент качает только свой.
+TIERS = {"1x": 267, "2x": 534, "3x": 800}
 FPS = 24
 MIN_LOOP = 72        # кадров, минимум 3 с — короче петля читается как дёрганье
 BRIDGE = 3           # синтезированных кадров, которыми закрывается стык петли
@@ -66,9 +69,9 @@ def content_box(video: Path, vw: int, vh: int):
     return left, top, right - left, bot - top
 
 
-def built(name: str):
-    """Готовый файл персонажа: <имя>.<хеш>.webm|webp, если он уже собран."""
-    return next(EXT_NPC.glob(f"{name}.*.web[mp]"), None)
+def built(name: str, tier: str = "3x"):
+    """Готовый файл персонажа в нужном размере, если он уже собран."""
+    return next((EXT_NPC / tier).glob(f"{name}.*.web[mp]"), None)
 
 
 def fresh(name: str, src: Path):
@@ -77,11 +80,11 @@ def fresh(name: str, src: Path):
     return webp is not None and webp.stat().st_mtime > src.stat().st_mtime
 
 
-def finalize(name: str, tmp: Path, ext: str):
+def finalize(name: str, tmp: Path, ext: str, tier: str):
     """Переименовать в <имя>.<хеш содержимого>.<ext>, старые версии убрать."""
     digest = hashlib.sha256(tmp.read_bytes()).hexdigest()[:8]
-    final = EXT_NPC / f"{name}.{digest}.{ext}"
-    for old in EXT_NPC.glob(f"{name}.*.web[mp]"):
+    final = EXT_NPC / tier / f"{name}.{digest}.{ext}"
+    for old in (EXT_NPC / tier).glob(f"{name}.*.web[mp]"):
         if old != final and old != tmp:
             old.unlink()
     tmp.replace(final)
@@ -112,6 +115,8 @@ def build(video: Path, still: Path, original: Path, name: str):
     print(f"\n== {name}")
     ow, oh = dims(original)
     vw, vh = dims(video)
+    # петля считается в самом крупном размере, остальные ужимаются из неё
+    OUT_H = TIERS["3x"]
     out_w = round(OUT_H * ow / oh) // 2 * 2
 
     cx, cy, cw, ch = content_box(video, vw, vh)
@@ -173,21 +178,23 @@ def build(video: Path, still: Path, original: Path, name: str):
     L = len(loop)
     print(f"   петля {L} кадров ({L / FPS:.2f} c)")
 
-    canvas = loop
-
-    EXT_NPC.mkdir(parents=True, exist_ok=True)
-    out = EXT_NPC / f"{name}.tmp"
-    # VP9, а не animated webp: тот жмёт покадровой разницей, без компенсации
-    # движения, и на том же качестве весит в 2.5 раза больше (10.2 против 4.0 МБ
-    # у Амалии при 44.4 против 44.4 dB). Плюс видео декодируется аппаратно.
-    run(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24",
-         "-s", f"{out_w}x{OUT_H}", "-r", str(FPS), "-i", "-",
-         "-c:v", "libvpx-vp9", "-crf", "24", "-b:v", "0", "-row-mt", "1",
-         "-pix_fmt", "yuv420p", "-an", "-f", "webm", str(out)],
-        input=canvas.tobytes())
-    out = finalize(name, out, "webm")
-
-    print(f"   {out_w}x{OUT_H}  webm {out.stat().st_size / 1e6:.2f} MB")
+    data = loop.astype(np.uint8).tobytes()
+    sizes = []
+    for tier, h in TIERS.items():
+        w = round(h * ow / oh) // 2 * 2
+        (EXT_NPC / tier).mkdir(parents=True, exist_ok=True)
+        out = EXT_NPC / tier / f"{name}.tmp"
+        # VP9, а не animated webp: тот жмёт покадровой разницей, без компенсации
+        # движения, и на том же качестве весит в 2.5 раза больше (10.2 против
+        # 4.0 МБ у Амалии при равном PSNR). Плюс декодируется аппаратно.
+        run(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24",
+             "-s", f"{out_w}x{OUT_H}", "-r", str(FPS), "-i", "-",
+             "-vf", f"scale={w}:{h}", "-sws_flags", "lanczos",
+             "-c:v", "libvpx-vp9", "-crf", "24", "-b:v", "0", "-row-mt", "1",
+             "-pix_fmt", "yuv420p", "-an", "-f", "webm", str(out)], input=data)
+        out = finalize(name, out, "webm", tier)
+        sizes.append(f"{tier} {w}x{h} {out.stat().st_size / 1e6:.2f}M")
+    print(f"   {', '.join(sizes)}")
     return name
 
 
@@ -197,14 +204,18 @@ def build_still(still: Path, original: Path, name: str):
         print(f"== {name}: уже собран")
         return name
     ow, oh = dims(original)
-    out_w = round(OUT_H * ow / oh) // 2 * 2
-    webp = EXT_NPC / f"{name}.tmp"
-    EXT_NPC.mkdir(parents=True, exist_ok=True)
-    # один кадр весит копейки, поэтому без потерь вовсе
-    run(["ffmpeg", "-v", "error", "-y", "-i", str(still),
-         "-vf", f"scale={out_w}:{OUT_H}", "-lossless", "1", "-f", "webp", str(webp)])
-    webp = finalize(name, webp, "webp")
-    print(f"== {name}: статика {out_w}x{OUT_H}, {webp.stat().st_size / 1e3:.0f} KB")
+    sizes = []
+    for tier, h in TIERS.items():
+        w = round(h * ow / oh) // 2 * 2
+        (EXT_NPC / tier).mkdir(parents=True, exist_ok=True)
+        webp = EXT_NPC / tier / f"{name}.tmp"
+        # один кадр весит копейки, поэтому без потерь вовсе
+        run(["ffmpeg", "-v", "error", "-y", "-i", str(still),
+             "-vf", f"scale={w}:{h}", "-sws_flags", "lanczos",
+             "-lossless", "1", "-f", "webp", str(webp)])
+        webp = finalize(name, webp, "webp", tier)
+        sizes.append(f"{tier} {webp.stat().st_size / 1e3:.0f}K")
+    print(f"== {name}: статика {', '.join(sizes)}")
     return name
 
 
@@ -226,7 +237,7 @@ def main():
         "id": i,
         "priority": 1,
         "action": {"type": "redirect",
-                   "redirect": {"extensionPath": f"/npc/{built(n).name}"}},
+                   "redirect": {"extensionPath": f"/npc/3x/{built(n).name}"}},
         "condition": {"urlFilter": f"||i.mist-game.ru/npc/{n}.jpg",
                       "resourceTypes": ["image"]},
     } for i, n in enumerate(sorted(names), 1)]
@@ -246,7 +257,11 @@ def write_userscript(names):
     path = ROOT / "mist-overhaul.user.js"
     version = time.strftime("%Y.%m.%d.%H%M")
 
-    urls = ",\n".join(f'    {n}: "{HOST}/{built(n).name}"' for n in names)
+    def entry(n):
+        by_tier = ", ".join(f'"{t}": "{HOST}/{t}/{built(n, t).name}"' for t in TIERS)
+        return f"    {n}: {{{by_tier}}}"
+    urls = ",\n".join(entry(n) for n in names)
+
     text = re.sub(r"^// @version.*$", f"// @version      {version}",
                   path.read_text(), count=1, flags=re.M)
     text = re.sub(r"^(  // --- ссылки на портреты.*?---\n).*?(?=^  // --- конец блока)",

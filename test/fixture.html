@@ -23,20 +23,20 @@ const css = p => getComputedStyle(el())[p];
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 (async () => {
-  put('caravaneer');
-  await sleep(300);
-  // анимация — это <video> поверх, статика — второй слой фона
-  check('портрет подменён', el().dataset.mistOverhaul === 'caravaneer'
+  put('bride_amalia_milton_8thmarch');     // анимированный: <video> поверх
+  await sleep(400);
+  check('анимация подменена', el().dataset.mistOverhaul === 'bride_amalia_milton_8thmarch'
         && !!el().querySelector('video.mist-overhaul'));
   check('оригинал остался запасным слоем',
-        /i\.mist-game\.ru\/npc\/caravaneer\.jpg/.test(css('backgroundImage')));
+        /i\.mist-game\.ru\/npc\/bride_amalia_milton_8thmarch\.jpg/.test(css('backgroundImage')));
   // слоёв два, поэтому computed-значение повторяется под каждый
   check('масштаб под картинку 2x', /^(100% 100%)(, \1)*$/.test(css('backgroundSize')));
 
-  put('ifrit');                       // игра меняет персонажа без перезагрузки
-  await sleep(300);
-  check('смена персонажа подхвачена', el().dataset.mistOverhaul === 'ifrit'
-        && el().querySelectorAll('video.mist-overhaul').length === 1);
+  put('caravaneer');                  // статичный, и без перезагрузки страницы
+  await sleep(400);
+  check('смена персонажа подхвачена', el().dataset.mistOverhaul === 'caravaneer'
+        && !el().querySelector('video.mist-overhaul')
+        && /caravaneer\.[0-9a-f]+\.webp/.test(css('backgroundImage')));
 
   // портреты должны лечь в хранилище сами, без встречи с персонажем
   let n = 0;
