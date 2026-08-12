@@ -1,6 +1,7 @@
 <!doctype html><meta charset=utf-8><title>Mist Overhaul — проверка юзерскрипта</title>
-<!-- Отдать по http (на file:// не поедет <script src>) и открыть: четыре PASS.
-     Проверяется логика подмены; сами картинки грузить не обязательно. -->
+<!-- Отдать по http (на file:// не поедет <script src>) и открыть с новым
+     query-параметром, иначе браузер подсунет закешированный скрипт.
+     Ждать пять PASS; первый прогон качает ~54 МБ, дальше берёт из хранилища. -->
 <script src="../mist-overhaul.user.js"></script>
 
 <div id="host"></div>
@@ -8,34 +9,41 @@
 
 <script>
 const host = document.getElementById('host');
+const out = document.getElementById('out');
 const put = npc => host.innerHTML =
   `<div class="userpic" style="background: url(//i.mist-game.ru/npc/${npc}.jpg); border: 1px solid #f1e8c9;"></div>`;
 
 const log = [];
-const check = (label, ok) => log.push((ok ? 'PASS ' : 'FAIL ') + label);
-const bg = () => getComputedStyle(host.firstElementChild).backgroundImage;
+const check = (label, ok) => {
+  log.push((ok ? 'PASS ' : 'FAIL ') + label);
+  out.textContent = log.join('\n');
+};
+const el = () => host.firstElementChild;
+const css = p => getComputedStyle(el())[p];
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-put('caravaneer');
-setTimeout(() => {
-  check('портрет подменён', /cdn\.jsdelivr\.net\/.*\/caravaneer\.[0-9a-f]+\.webp/.test(bg()));
-  check('оригинал остался запасным слоем', /i\.mist-game\.ru\/npc\/caravaneer\.jpg/.test(bg()));
+(async () => {
+  put('caravaneer');
+  await sleep(300);
+  // адрес бывает и blob: из хранилища, и прямой с CDN — важен факт подмены
+  check('портрет подменён', el().dataset.mistOverhaul === 'caravaneer'
+        && css('backgroundImage').split(/,(?=\s*url)/).length === 2);
+  check('оригинал остался запасным слоем',
+        /i\.mist-game\.ru\/npc\/caravaneer\.jpg/.test(css('backgroundImage')));
   // слоёв два, поэтому computed-значение повторяется под каждый
-  check('масштаб под картинку 2x',
-        /^(100% 100%)(, \1)*$/.test(getComputedStyle(host.firstElementChild).backgroundSize));
-  put('ifrit');                       // игра меняет персонажа без перезагрузки
-  setTimeout(() => {
-    check('смена персонажа подхвачена', /cdn\.jsdelivr\.net\/.*\/ifrit\.[0-9a-f]+\.webp/.test(bg()));
-    document.getElementById('out').textContent = log.join('\n');
-  }, 200);
-}, 200);
-</script>
+  check('масштаб под картинку 2x', /^(100% 100%)(, \1)*$/.test(css('backgroundSize')));
 
-<script>
-// пятая проверка: все 22 портрета запрошены сразу, не по одному по мере встречи
-addEventListener('load', () => setTimeout(() => {
-  const n = performance.getEntriesByType('resource')
-    .filter(e => /cdn\.jsdelivr\.net\/.*\.webp$/.test(e.name)).length;
-  document.getElementById('out').textContent +=
-    '\n' + (n >= 22 ? 'PASS ' : 'FAIL ') + `предзагрузка всех портретов (запрошено ${n})`;
-}, 3000));
+  put('ifrit');                       // игра меняет персонажа без перезагрузки
+  await sleep(300);
+  check('смена персонажа подхвачена', el().dataset.mistOverhaul === 'ifrit');
+
+  // портреты должны лечь в хранилище сами, без встречи с персонажем
+  let n = 0;
+  for (let i = 0; i < 90 && n < 22; i++) {
+    await sleep(2000);
+    n = (await (await caches.open('mist-overhaul')).keys()).length;
+    out.textContent = log.join('\n') + `\n… в хранилище ${n} из 22`;
+  }
+  check(`предзагрузка всех портретов (в хранилище ${n})`, n >= 22);
+})();
 </script>

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mist Overhaul
 // @namespace    https://github.com/netherguy4/mist-overhaul
-// @version      2026.08.12.1718
+// @version      2026.08.12.1726
 // @description  Анимированные портреты персонажей в Mist
 // @author       nether
 // @match        *://*.mist-game.ru/*
@@ -18,10 +18,13 @@
 
   // Портреты не через @resource: Tampermonkey держал их с первой установки и не
   // перекачивал даже после смены ссылок — в игре отдавал сборку, которой на CDN
-  // давно не было. Обычный url() надёжнее: в имени файла лежит хеш содержимого,
-  // поэтому адрес самоинвалидируется, а раз он неизменяем — jsDelivr отдаёт его
-  // с вечным кешем, и за картинкой ходят ровно один раз. Качаются все сразу,
-  // предзагрузкой в конце файла.
+  // давно не было. Здесь всё хранится в Cache Storage: у него, в отличие от
+  // обычного кеша браузера, нет срока (jsDelivr отдаёт max-age=604800, то есть
+  // неделю) и его не сносит чистка истории. Складываются все сразу, при первом
+  // же заходе — см. prime() в конце файла.
+  //
+  // Инвалидация — в имени файла: там хеш содержимого, поэтому изменившийся
+  // портрет приезжает под новым адресом, а старый вычищается из хранилища.
 
   // --- ссылки на портреты, дальше до конца блока правит build.py ---
   const URLS = {
@@ -51,22 +54,45 @@
   // --- конец блока ---
 
   const NPC = /\/npc\/([a-z0-9_]+)\.(?:jpe?g|png)/i;
+  const CACHE = 'mist-overhaul';
 
-  function swapBg(el) {
+  let store = null;
+  // хранилище открываем сразу, а не по load: подмена случается раньше, и иначе
+  // портрет каждый раз шёл бы с CDN мимо уже скачанного
+  const ready = self.caches ? caches.open(CACHE).then(c => (store = c), () => {})
+                            : Promise.resolve();
+  const blobs = new Map();              // адрес -> blob:, только для показанных
+
+  /** Адрес для показа: из хранилища, а пока его нет — прямо с CDN. */
+  async function source(url) {
+    if (blobs.has(url)) return blobs.get(url);
+    await ready;
+    const hit = store && await store.match(url);
+    if (!hit) return url;
+    blobs.set(url, URL.createObjectURL(await hit.blob()));
+    // портрет на экране один, держать больше пары незачем: это десятки мегабайт
+    for (const old of [...blobs.keys()].slice(0, -2)) {
+      URL.revokeObjectURL(blobs.get(old));
+      blobs.delete(old);
+    }
+    return blobs.get(url);
+  }
+
+  async function swapBg(el) {
     const cur = getComputedStyle(el).backgroundImage;
     const name = cur.match(NPC)?.[1];
     if (!name || el.dataset.mistOverhaul === name) return;
     const url = URLS[name];
     if (!url) return;                 // персонажа ещё не рисовали — остаётся оригинал
     el.dataset.mistOverhaul = name;
-    // оригинал нижним слоем: пока портрет качается, видно его, а не пустоту
-    el.style.backgroundImage = `url(${url}), ${cur}`;
     // в игре стоит background-size: auto, а наши картинки вдвое крупнее
     el.style.backgroundSize = '100% 100%';
     el.style.backgroundRepeat = 'no-repeat';
+    // оригинал нижним слоем: пока портрет достаётся, видно его, а не пустоту
+    el.style.backgroundImage = `url(${await source(url)}), ${cur}`;
   }
 
-  function swapImg(img) {
+  async function swapImg(img) {
     const name = img.src.match(NPC)?.[1];
     if (!name || img.dataset.mistOverhaul === name) return;
     const url = URLS[name];
@@ -74,7 +100,7 @@
     img.dataset.mistOverhaul = name;
     const original = img.src;
     img.addEventListener('error', () => { img.src = original; }, { once: true });
-    img.src = url;
+    img.src = await source(url);
   }
 
   function scan(root) {
@@ -99,11 +125,20 @@
   scan(document);
   document.addEventListener('DOMContentLoaded', () => scan(document));
 
-  // Все портреты тянем сразу, не дожидаясь встречи с персонажем. Адреса
-  // неизменяемы (хеш в имени), поэтому jsDelivr отдаёт их с вечным кешем:
-  // сеть работает один раз, дальше всё берётся с диска. Ждём load, чтобы не
-  // отбирать канал у самой игры.
-  addEventListener('load', () => {
-    for (const url of Object.values(URLS)) new Image().src = url;
-  });
+  /** Сложить все портреты в хранилище и выкинуть оставшиеся от прошлых версий. */
+  async function prime() {
+    await ready;
+    if (!store) return;               // не защищённый контекст — работаем прямо с CDN
+    const want = new Set(Object.values(URLS));
+    for (const req of await store.keys()) {
+      if (!want.has(req.url)) await store.delete(req);   // адрес сменился = старый файл
+    }
+    for (const url of want) {
+      if (!await store.match(url)) await store.add(url).catch(() => {});
+    }
+  }
+
+  // Тянем всё сразу, не дожидаясь встречи с персонажем, но после load —
+  // чтобы не отбирать канал у самой игры.
+  addEventListener('load', prime);
 })();
