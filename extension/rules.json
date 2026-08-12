@@ -21,7 +21,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/caravaneer.47f9f546.webm"
+        "extensionPath": "/npc/caravaneer.8b72da77.webp"
       }
     },
     "condition": {
@@ -53,7 +53,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/cpt_tirim_mormont.1a5c713a.webm"
+        "extensionPath": "/npc/cpt_tirim_mormont.84bb7f27.webp"
       }
     },
     "condition": {
@@ -133,7 +133,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/ifrit.a0ec1e97.webm"
+        "extensionPath": "/npc/ifrit.386e8562.webp"
       }
     },
     "condition": {
