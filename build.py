@@ -34,15 +34,16 @@ HOST = f"https://cdn.jsdelivr.net/gh/{REPO}@main/extension/npc"
 OUT_H = 534          # 2x от игровых 181x267
 FPS = 24
 MIN_LOOP = 72        # кадров, минимум 3 с — короче петля читается как дёрганье
+BRIDGE = 3           # синтезированных кадров, которыми закрывается стык петли
 BAR = 10             # яркость, ниже которой строка кадра считается чёрным полем
 
 def run(cmd, **kw):
     return subprocess.run(cmd, check=True, capture_output=True, **kw)
 
 
-def raw(args, w, h, ch):
+def raw(args, w, h, ch, input=None):
     """Прогнать ffmpeg и вернуть кадры как (N, h, w, ch) uint8."""
-    out = run(["ffmpeg", "-v", "error", *args, "-f", "rawvideo", "-"]).stdout
+    out = run(["ffmpeg", "-v", "error", *args, "-f", "rawvideo", "-"], input=input).stdout
     return np.frombuffer(out, np.uint8).reshape(-1, h, w, ch)
 
 
@@ -87,6 +88,23 @@ def finalize(name: str, tmp: Path, ext: str):
     return final
 
 
+def bridge(frames, i: int, j: int, w: int, h: int):
+    """Кадры перехода из конца петли в начало, синтезированные по движению.
+
+    Не кроссфейд: ffmpeg строит промежуточные кадры оптическим потоком, поэтому
+    двоения нет — картинка честно доезжает из одной позы в другую.
+    """
+    ctx = np.concatenate([frames[j - 4:j], frames[i:i + 4]]).astype(np.uint8)
+    out = run(["ffmpeg", "-v", "error", "-f", "rawvideo", "-pix_fmt", "rgb24",
+               "-s", f"{w}x{h}", "-r", str(FPS), "-i", "-",
+               "-vf", f"minterpolate=fps={FPS * (BRIDGE + 1)}:mi_mode=mci:"
+                      "mc_mode=aobmc:me_mode=bidir:vsbmc=1",
+               "-f", "rawvideo", "-pix_fmt", "rgb24", "-"], input=ctx.tobytes()).stdout
+    g = np.frombuffer(out, np.uint8).reshape(-1, h, w, 3)
+    start = 3 * (BRIDGE + 1) + 1
+    return g[start:start + BRIDGE]
+
+
 def build(video: Path, still: Path, original: Path, name: str):
     if fresh(name, video):
         print(f"== {name}: уже собран")
@@ -128,15 +146,29 @@ def build(video: Path, still: Path, original: Path, name: str):
     d = np.abs(small[:, None, :] - small[None, :, :]).mean(2)
 
     n = len(small)
-    fits = [(j - i, -d[i, j], i, j)
-            for i in range(n - MIN_LOOP) for j in range(i + MIN_LOOP, n)
-            if d[i, j] <= thr]
-    if not fits:
-        print(f"   клип не смыкается ни на одном участке (порог {thr:.2f}) -> статика")
-        return None
-    _, negw, i, j = max(fits)
+    pairs = [(d[i, j], i, j) for i in range(4, n - MIN_LOOP)
+             for j in range(i + MIN_LOOP, n - 3)]
+    _, i, j = min(pairs)
     loop = frames[i:j]
-    print(f"   смыкающийся кусок {i}..{j}, стык {-negw:.2f} при пороге {thr:.2f}")
+
+    # Стык закрываем синтезированными кадрами, если он выпирает. Кроссфейд тут
+    # не годится — он усредняет движение и анимация подвисает; разворот пускает
+    # движение задом наперёд. Оптический поток честно доводит позу до начальной.
+    if d[i, j] > thr:
+        loop = np.concatenate([loop, bridge(frames, i, j, vid_w, OUT_H)])
+        sm = raw(["-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{vid_w}x{OUT_H}",
+                  "-i", "-", "-vf", "scale=64:94,format=gray", "-pix_fmt", "gray"],
+                 64, 94, 1, input=np.concatenate([loop, loop[:1]]).astype(np.uint8).tobytes())
+        sm = sm.reshape(-1, 64 * 94).astype(np.float32)
+        worst = float(np.abs(np.diff(sm, axis=0)).mean(1)[-BRIDGE - 1:].max())
+        if worst > thr:
+            print(f"   стык {d[i, j]:.2f} не закрывается даже синтезом "
+                  f"({worst:.2f} при пороге {thr:.2f}) -> статика")
+            return None
+        print(f"   кусок {i}..{j}, стык {d[i, j]:.2f} закрыт {BRIDGE} синтезированными "
+              f"кадрами (осталось {worst:.2f} при пороге {thr:.2f})")
+    else:
+        print(f"   смыкающийся кусок {i}..{j}, стык {d[i, j]:.2f} при пороге {thr:.2f}")
 
     L = len(loop)
     print(f"   петля {L} кадров ({L / FPS:.2f} c)")
