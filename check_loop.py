@@ -1,28 +1,27 @@
 #!/usr/bin/env python3
-"""Проверка петли: разрыв на стыке не должен выделяться среди обычных переходов."""
+"""Проверка петли: на стыке и в точке разворота не должно быть рывка.
+
+Петля «туда и обратно» разрыва не имеет по построению, но проверка ловит
+случай, когда кадры перестали разворачиваться — например если в сборке
+поменяли склейку и вернулся скачок.
+"""
 import subprocess
-import sys
 from pathlib import Path
 
 import numpy as np
 
-for f in sorted((Path(__file__).parent / "extension" / "npc").glob("*.webp")):
-    # ffmpeg не умеет декодировать animated webp, magick умеет
+n = 0
+for f in sorted((Path(__file__).parent / "extension" / "npc").glob("*.webm")):
     out = subprocess.run(
-        ["magick", str(f), "-coalesce", "-colorspace", "Gray",
-         "-resize", "64x94!", "-depth", "8", "gray:-"],
+        ["ffmpeg", "-v", "error", "-i", str(f), "-vf", "scale=64:94,format=gray",
+         "-pix_fmt", "gray", "-f", "rawvideo", "-"],
         check=True, capture_output=True).stdout
     v = np.frombuffer(out, np.uint8).reshape(-1, 94 * 64).astype(np.float32)
-    if len(v) < 2:
-        continue                      # статичная заглушка, петли нет
-    steps = np.abs(np.diff(v, axis=0)).mean(1)
-    seam = np.abs(v[0] - v[-1]).mean()
-    ratio = seam / steps.mean()
-    print(f"{f.stem:34} шов {seam:5.2f}  средний переход {steps.mean():5.2f}  "
-          f"худший {steps.max():5.2f}  x{ratio:.2f}")
-    # до кодирования шов выходит ниже среднего перехода; в готовом webp он слегка
-    # завышен, потому что нулевой кадр — ключевой, а остальные разностные.
-    # порог по абсолютной величине нужен для почти статичных анимаций,
-    # где средний переход сам по себе меньше шума кодека
-    assert seam <= max(1.0, 2 * steps.mean()), f"{f.stem}: стык видно, петля не сошлась"
-print("ok: стык у всех петель не выделяется среди обычных переходов")
+    steps = np.abs(np.diff(np.vstack([v, v[:1]]), axis=0)).mean(1)   # с переходом конец->начало
+    med, seam, turn = np.median(steps), steps[-1], steps[len(v) // 2 - 1]
+    print(f"{f.stem.split('.')[0]:32} стык {seam:5.2f}  разворот {turn:5.2f}  "
+          f"медианное движение {med:5.2f}")
+    assert seam <= 1.5 * med, f"{f.stem}: рывок на стыке петли"
+    assert turn <= 1.5 * med, f"{f.stem}: рывок в точке разворота"
+    n += 1
+print(f"ok: проверено {n} анимаций, стыки не выделяются среди обычного движения")

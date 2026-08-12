@@ -33,16 +33,8 @@ HOST = f"https://cdn.jsdelivr.net/gh/{REPO}@main/extension/npc"
 
 OUT_H = 534          # 2x от игровых 181x267
 FPS = 24
-MIN_LOOP = 96        # >= 4 c
-XFADE = 10           # кадров растушёвки шва
 FEATHER = 18         # px растушёвки боковых стыков с апскейлом
 BAR = 10             # яркость, ниже которой строка кадра считается чёрным полем
-
-# имена файлов у генератора видео потерялись
-ALIASES = {
-    "Animate_source_image_idle_loop_202608120008": "ifrit",
-}
-
 
 def run(cmd, **kw):
     return subprocess.run(cmd, check=True, capture_output=True, **kw)
@@ -52,38 +44,6 @@ def raw(args, w, h, ch):
     """Прогнать ffmpeg и вернуть кадры как (N, h, w, ch) uint8."""
     out = run(["ffmpeg", "-v", "error", *args, "-f", "rawvideo", "-"]).stdout
     return np.frombuffer(out, np.uint8).reshape(-1, h, w, ch)
-
-
-def find_loop(gray):
-    """(start, length) с минимальным разрывом на стыке при максимальной длине."""
-    f = gray.reshape(len(gray), -1).astype(np.float32)
-    d = np.abs(f[:, None, :] - f[None, :, :]).mean(2)   # N x N
-
-    best = None
-    n = len(f)
-    for s in range(0, n - MIN_LOOP - XFADE):
-        for L in range(MIN_LOOP, n - XFADE - s):
-            cost = d[s, s + L] + d[s + 1, s + L + 1]
-            if best is None or cost < best[0]:
-                best = (cost, s, L)
-    # среди почти таких же швов берём самую длинную петлю
-    cap = best[0] * 1.10
-    longest = max(
-        ((d[s, s + L] + d[s + 1, s + L + 1], s, L)
-         for s in range(0, n - MIN_LOOP - XFADE)
-         for L in range(MIN_LOOP, n - XFADE - s)
-         if d[s, s + L] + d[s + 1, s + L + 1] <= cap),
-        key=lambda c: (c[2], -c[0]),
-    )
-    return longest, best[0]
-
-
-def crossfade(frames, s, L):
-    """Кадры петли: хвост перетекает в начало, шов пропадает."""
-    out = frames[s:s + L].astype(np.float32).copy()
-    a = (np.arange(XFADE, dtype=np.float32) / XFADE)[:, None, None, None]
-    out[:XFADE] = (1 - a) * frames[s + L:s + L + XFADE] + a * out[:XFADE]
-    return np.clip(out, 0, 255).astype(np.uint8)
 
 
 def dims(path: Path):
@@ -149,15 +109,18 @@ def build(video: Path, still: Path, original: Path, name: str):
     vid_w = out_w if native else round(0.5625 * OUT_H) // 2 * 2
     x0 = (out_w - vid_w) // 2
 
-    gray = raw(["-i", str(video), "-vf", f"{crop}scale=64:114,format=gray", "-pix_fmt", "gray"],
-               64, 114, 1)
-    (cost, s, L), best = find_loop(gray)
-    print(f"   петля: кадры {s}..{s + L} ({L} кадров, {L / FPS:.2f} c), "
-          f"шов {cost:.2f} (лучший возможный {best:.2f})")
-
     frames = raw(["-i", str(video), "-vf", f"{crop}scale={vid_w}:{OUT_H}", "-pix_fmt", "rgb24"],
                  vid_w, OUT_H, 3)
-    loop = crossfade(frames, s, L)
+
+    # Петля «туда и обратно»: у неё нет стыка по построению. Поиск пары похожих
+    # кадров с кроссфейдом давал две беды разом — на стыке всё равно оставался
+    # скачок (1.01 при медианном движении 0.56), а сам кроссфейд на десяток
+    # кадров усреднял движение, и анимация на треть секунды подвисала.
+    # Разворот удваивает длину, а весит почти столько же: VP9 жмёт зеркальную
+    # половину не хуже прямой (2.15 МБ против 1.94).
+    loop = np.concatenate([frames, frames[-2:0:-1]])   # без дублей на концах
+    L = len(loop)
+    print(f"   петля туда-обратно: {len(frames)} -> {L} кадров ({L / FPS:.2f} c)")
 
     if native:
         canvas = loop
@@ -210,7 +173,9 @@ def build_still(still: Path, original: Path, name: str):
 
 
 def main():
-    videos = {ALIASES.get(v.stem, v.stem): v for v in (SRC / "Video").glob("*.mp4")}
+    # needs-regen/ намеренно мимо glob: там видео с артефактами генератора,
+    # персонажи из него получают статичный апскейл, пока не будет чистого дубля
+    videos = {v.stem: v for v in (SRC / "Video").glob("*.mp4")}
     names = []
     for original in sorted((SRC / "Original").glob("*.jpg")):
         name = original.stem
