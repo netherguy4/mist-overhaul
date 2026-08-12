@@ -1,0 +1,354 @@
+[
+  {
+    "id": 1,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "extensionPath": "/npc/bride_amalia_milton_8thmarch.webp"
+      }
+    },
+    "condition": {
+      "urlFilter": "||i.mist-game.ru/npc/bride_amalia_milton_8thmarch.jpg",
+      "resourceTypes": [
+        "image"
+      ]
+    }
+  },
+  {
+    "id": 2,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "extensionPath": "/npc/caravaneer.webp"
+      }
+    },
+    "condition": {
+      "urlFilter": "||i.mist-game.ru/npc/caravaneer.jpg",
+      "resourceTypes": [
+        "image"
+      ]
+    }
+  },
+  {
+    "id": 3,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "extensionPath": "/npc/corvin.webp"
+      }
+    },
+    "condition": {
+      "urlFilter": "||i.mist-game.ru/npc/corvin.jpg",
+      "resourceTypes": [
+        "image"
+      ]
+    }
+  },
+  {
+    "id": 4,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "extensionPath": "/npc/cpt_tirim_mormont.webp"
+      }
+    },
+    "condition": {
+      "urlFilter": "||i.mist-game.ru/npc/cpt_tirim_mormont.jpg",
+      "resourceTypes": [
+        "image"
+      ]
+    }
+  },
+  {
+    "id": 5,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "extensionPath": "/npc/demandred.webp"
+      }
+    },
+    "condition": {
+      "urlFilter": "||i.mist-game.ru/npc/demandred.jpg",
+      "resourceTypes": [
+        "image"
+      ]
+    }
+  },
+  {
+    "id": 6,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "extensionPath": "/npc/ghost_boss_traun.webp"
+      }
+    },
+    "condition": {
+      "urlFilter": "||i.mist-game.ru/npc/ghost_boss_traun.jpg",
+      "resourceTypes": [
+        "image"
+      ]
+    }
+  },
+  {
+    "id": 7,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "extensionPath": "/npc/ghost_simon_kornish.webp"
+      }
+    },
+    "condition": {
+      "urlFilter": "||i.mist-game.ru/npc/ghost_simon_kornish.jpg",
+      "resourceTypes": [
+        "image"
+      ]
+    }
+  },
+  {
+    "id": 8,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "extensionPath": "/npc/guild_violett_tari.webp"
+      }
+    },
+    "condition": {
+      "urlFilter": "||i.mist-game.ru/npc/guild_violett_tari.jpg",
+      "resourceTypes": [
+        "image"
+      ]
+    }
+  },
+  {
+    "id": 9,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "extensionPath": "/npc/ifrit.webp"
+      }
+    },
+    "condition": {
+      "urlFilter": "||i.mist-game.ru/npc/ifrit.jpg",
+      "resourceTypes": [
+        "image"
+      ]
+    }
+  },
+  {
+    "id": 10,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "extensionPath": "/npc/indiana_lester.webp"
+      }
+    },
+    "condition": {
+      "urlFilter": "||i.mist-game.ru/npc/indiana_lester.jpg",
+      "resourceTypes": [
+        "image"
+      ]
+    }
+  },
+  {
+    "id": 11,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "extensionPath": "/npc/innkeeper.webp"
+      }
+    },
+    "condition": {
+      "urlFilter": "||i.mist-game.ru/npc/innkeeper.jpg",
+      "resourceTypes": [
+        "image"
+      ]
+    }
+  },
+  {
+    "id": 12,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "extensionPath": "/npc/lumberjack.webp"
+      }
+    },
+    "condition": {
+      "urlFilter": "||i.mist-game.ru/npc/lumberjack.jpg",
+      "resourceTypes": [
+        "image"
+      ]
+    }
+  },
+  {
+    "id": 13,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "extensionPath": "/npc/oracle.webp"
+      }
+    },
+    "condition": {
+      "urlFilter": "||i.mist-game.ru/npc/oracle.jpg",
+      "resourceTypes": [
+        "image"
+      ]
+    }
+  },
+  {
+    "id": 14,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "extensionPath": "/npc/overseas_koitira.webp"
+      }
+    },
+    "condition": {
+      "urlFilter": "||i.mist-game.ru/npc/overseas_koitira.jpg",
+      "resourceTypes": [
+        "image"
+      ]
+    }
+  },
+  {
+    "id": 15,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "extensionPath": "/npc/poacher_vargo.webp"
+      }
+    },
+    "condition": {
+      "urlFilter": "||i.mist-game.ru/npc/poacher_vargo.jpg",
+      "resourceTypes": [
+        "image"
+      ]
+    }
+  },
+  {
+    "id": 16,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "extensionPath": "/npc/postman.webp"
+      }
+    },
+    "condition": {
+      "urlFilter": "||i.mist-game.ru/npc/postman.jpg",
+      "resourceTypes": [
+        "image"
+      ]
+    }
+  },
+  {
+    "id": 17,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "extensionPath": "/npc/prisoner_toivo_beilish.webp"
+      }
+    },
+    "condition": {
+      "urlFilter": "||i.mist-game.ru/npc/prisoner_toivo_beilish.jpg",
+      "resourceTypes": [
+        "image"
+      ]
+    }
+  },
+  {
+    "id": 18,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "extensionPath": "/npc/rogue_boss_eshtar.webp"
+      }
+    },
+    "condition": {
+      "urlFilter": "||i.mist-game.ru/npc/rogue_boss_eshtar.jpg",
+      "resourceTypes": [
+        "image"
+      ]
+    }
+  },
+  {
+    "id": 19,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "extensionPath": "/npc/rogue_brun.webp"
+      }
+    },
+    "condition": {
+      "urlFilter": "||i.mist-game.ru/npc/rogue_brun.jpg",
+      "resourceTypes": [
+        "image"
+      ]
+    }
+  },
+  {
+    "id": 20,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "extensionPath": "/npc/rogue_girl_deina.webp"
+      }
+    },
+    "condition": {
+      "urlFilter": "||i.mist-game.ru/npc/rogue_girl_deina.jpg",
+      "resourceTypes": [
+        "image"
+      ]
+    }
+  },
+  {
+    "id": 21,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "extensionPath": "/npc/scientist_arvin_pottery_jr.webp"
+      }
+    },
+    "condition": {
+      "urlFilter": "||i.mist-game.ru/npc/scientist_arvin_pottery_jr.jpg",
+      "resourceTypes": [
+        "image"
+      ]
+    }
+  },
+  {
+    "id": 22,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "extensionPath": "/npc/white_mage.webp"
+      }
+    },
+    "condition": {
+      "urlFilter": "||i.mist-game.ru/npc/white_mage.jpg",
+      "resourceTypes": [
+        "image"
+      ]
+    }
+  }
+]

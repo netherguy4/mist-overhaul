@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Mist Overhaul",
+  "version": "1.0",
+  "description": "Анимированные портреты персонажей в игре Mist",
+  "permissions": ["declarativeNetRequest"],
+  "host_permissions": ["*://*.mist-game.ru/*"],
+  "declarative_net_request": {
+    "rule_resources": [
+      { "id": "npc", "enabled": true, "path": "rules.json" }
+    ]
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.mist-game.ru/*"],
+      "css": ["npc.css"],
+      "all_frames": true
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["npc/*.webp"],
+      "matches": ["*://*.mist-game.ru/*"]
+    }
+  ]
+}

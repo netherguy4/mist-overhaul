@@ -1,0 +1,32 @@
+<!doctype html><meta charset=utf-8><title>Mist Overhaul — проверка юзерскрипта</title>
+<!-- Открыть файл в браузере: должно быть четыре PASS. Проверяется логика подмены,
+     картинки не грузятся — GM_getResourceURL подменён заглушкой. -->
+<script>window.GM_getResourceURL = name => `https://stub.local/${name}.webp`;</script>
+<script src="../mist-overhaul.user.js"></script>
+
+<div id="host"></div>
+<pre id="out">…</pre>
+
+<script>
+const host = document.getElementById('host');
+const put = npc => host.innerHTML =
+  `<div class="userpic" style="background: url(//i.mist-game.ru/npc/${npc}.jpg); border: 1px solid #f1e8c9;"></div>`;
+
+const log = [];
+const check = (label, ok) => log.push((ok ? 'PASS ' : 'FAIL ') + label);
+const bg = () => getComputedStyle(host.firstElementChild).backgroundImage;
+
+put('caravaneer');
+setTimeout(() => {
+  check('портрет подменён', /stub\.local\/caravaneer\.webp/.test(bg()));
+  check('оригинал остался запасным слоем', /i\.mist-game\.ru\/npc\/caravaneer\.jpg/.test(bg()));
+  // слоёв два, поэтому computed-значение повторяется под каждый
+  check('масштаб под картинку 2x',
+        /^(100% 100%)(, \1)*$/.test(getComputedStyle(host.firstElementChild).backgroundSize));
+  put('ifrit');                       // игра меняет персонажа без перезагрузки
+  setTimeout(() => {
+    check('смена персонажа подхвачена', /stub\.local\/ifrit\.webp/.test(bg()));
+    document.getElementById('out').textContent = log.join('\n');
+  }, 200);
+}, 200);
+</script>

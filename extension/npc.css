@@ -1,0 +1,6 @@
+/* Портрет NPC — это background у div.userpic с background-size: auto, а анимация
+   вдвое крупнее оригинала (2x под HiDPI), иначе показался бы левый верхний угол. */
+.userpic[style*="/npc/"] {
+  background-size: 100% 100% !important;
+  background-repeat: no-repeat !important;
+}
