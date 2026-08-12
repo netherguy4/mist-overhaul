@@ -134,9 +134,11 @@ def build(video: Path, still: Path, name: str):
 
     EXT_NPC.mkdir(parents=True, exist_ok=True)
     webp = EXT_NPC / f"{name}.webp"
+    # картинки лежат у игрока локально, экономить нечего: 95 — колено кривой
+    # качества (40.4 dB против 36.0 на 82), выше растёт только вес
     run(["ffmpeg", "-v", "error", "-y", "-i", str(mkv), "-loop", "0",
-         "-c:v", "libwebp_anim", "-pix_fmt", "yuv420p",
-         "-q:v", "82", "-compression_level", "6", str(webp)])
+         "-c:v", "libwebp_anim", "-pix_fmt", "yuv420p", "-preset", "picture",
+         "-q:v", "95", "-compression_level", "6", str(webp)])
 
     GIF.mkdir(exist_ok=True)
     gif = GIF / f"{name}.gif"
@@ -159,8 +161,9 @@ def build_still(still: Path, original: Path, name: str):
     out_w = round(OUT_H * ow / oh) // 2 * 2
     webp = EXT_NPC / f"{name}.webp"
     EXT_NPC.mkdir(parents=True, exist_ok=True)
+    # один кадр весит копейки, поэтому без потерь вовсе
     run(["ffmpeg", "-v", "error", "-y", "-i", str(still),
-         "-vf", f"scale={out_w}:{OUT_H}", "-q:v", "88", str(webp)])
+         "-vf", f"scale={out_w}:{OUT_H}", "-lossless", "1", str(webp)])
     print(f"== {name}: статика {out_w}x{OUT_H}, {webp.stat().st_size / 1e3:.0f} KB")
     return name
 
