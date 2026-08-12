@@ -17,7 +17,12 @@ version=$(grep -m1 '^// @version' mist-overhaul.user.js | awk '{print $3}')
 git add -A
 git diff --cached --quiet && { echo "нечего публиковать"; exit 0; }
 git commit -m "${1:-обновление портретов}"
-git tag "v$version"
+if git rev-parse -q --verify "refs/tags/v$version" > /dev/null; then
+  echo "тег v$version уже есть — картинки не менялись"
+else
+  # именно аннотированный: легковесные теги --follow-tags не пушит
+  git tag -a "v$version" -m "${1:-обновление портретов}"
+fi
 git push --follow-tags
 
 echo "опубликовано v$version"
