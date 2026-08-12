@@ -34,6 +34,7 @@ HOST = f"https://cdn.jsdelivr.net/gh/{REPO}@main/extension/npc"
 OUT_H = 534          # 2x от игровых 181x267
 FPS = 24
 FEATHER = 18         # px растушёвки боковых стыков с апскейлом
+MIN_LOOP = 72        # кадров, минимум 3 с — короче петля читается как дёрганье
 BAR = 10             # яркость, ниже которой строка кадра считается чёрным полем
 
 def run(cmd, **kw):
@@ -112,29 +113,30 @@ def build(video: Path, still: Path, original: Path, name: str):
     frames = raw(["-i", str(video), "-vf", f"{crop}scale={vid_w}:{OUT_H}", "-pix_fmt", "rgb24"],
                  vid_w, OUT_H, 3)
 
-    # Генератор разгоняется от статичной картинки, поэтому клип часто смыкается,
-    # если срезать разгон в начале. Ищем кадр, ближайший к последнему, и считаем
-    # петлю сомкнутой, если стык не выпирает среди обычных переходов: в спокойной
-    # анимации заметен и небольшой скачок, в резкой — теряется.
-    small = frames[:, ::8, ::8].reshape(len(frames), -1).astype(np.float32)
-    k = int(np.argmin(np.abs(small[:len(small) // 2] - small[-1]).mean(1)))
-    wrap = float(np.abs(small[k] - small[-1]).mean())
-    steps = np.abs(np.diff(small[k:], axis=0)).mean(1)
-    worst = float(np.percentile(steps, 95))
+    # Ищем кусок, который смыкается сам: последний кадр должен стыковаться с
+    # первым не хуже, чем соседние кадры между собой. Ни кроссфейда, ни
+    # разворота — и то и другое даёт видимый артефакт: кроссфейд усредняет
+    # движение и анимация подвисает, разворот пускает движение задом наперёд.
+    # Не нашлось — персонаж остаётся статикой, это честнее рывка.
+    # именно усреднением, а не прореживанием: каждый восьмой пиксель на
+    # искрящейся картинке даёт шум, который завышает порог и пропускает рывок
+    small = raw(["-i", str(video), "-vf", f"{crop}scale=64:94,format=gray", "-pix_fmt", "gray"],
+                64, 94, 1).reshape(len(frames), -1).astype(np.float32)
+    steps = np.abs(np.diff(small, axis=0)).mean(1)
+    thr = float(np.percentile(steps, 95))
+    d = np.abs(small[:, None, :] - small[None, :, :]).mean(2)
 
-    if wrap <= worst:
-        loop = frames[k:]
-        print(f"   клип замыкается{f', срезан разгон {k} кадров' if k else ''} "
-              f"(стык {wrap:.2f} при худшем переходе {worst:.2f})")
-    else:
-        # Петля «туда и обратно»: стыка нет по построению. Кроссфейд между
-        # похожими кадрами не годится — он усредняет движение, и анимация на
-        # треть секунды подвисает, что читается как рывок. Разворот удваивает
-        # длину, но весит почти столько же: VP9 жмёт зеркальную половину не
-        # хуже прямой (2.15 МБ против 1.94).
-        loop = np.concatenate([frames[k:], frames[-2:k:-1]])   # без дублей на концах
-        print(f"   клип не замыкается (стык {wrap:.2f} при худшем переходе {worst:.2f}) "
-              f"-> петля туда-обратно")
+    n = len(small)
+    fits = [(j - i, -d[i, j], i, j)
+            for i in range(n - MIN_LOOP) for j in range(i + MIN_LOOP, n)
+            if d[i, j] <= thr]
+    if not fits:
+        print(f"   клип не смыкается ни на одном участке (порог {thr:.2f}) -> статика")
+        return None
+    _, negw, i, j = max(fits)
+    loop = frames[i:j]
+    print(f"   смыкающийся кусок {i}..{j}, стык {-negw:.2f} при пороге {thr:.2f}")
+
     L = len(loop)
     print(f"   петля {L} кадров ({L / FPS:.2f} c)")
 
@@ -199,8 +201,8 @@ def main():
         if still is None:
             print(f"!! нет апскейла для {name}, пропуск")
             continue
-        names.append(build(videos[name], still, original, name) if name in videos
-                     else build_still(still, original, name))
+        done = build(videos[name], still, original, name) if name in videos else None
+        names.append(done or build_still(still, original, name))
 
     rules = [{
         "id": i,
