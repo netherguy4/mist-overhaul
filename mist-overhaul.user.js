@@ -7,31 +7,33 @@
 // @match        *://*.mist-game.ru/*
 // @run-at       document-start
 // @grant        GM_getResourceURL
-// @updateURL    https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/mist-overhaul.user.js
-// @downloadURL  https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/mist-overhaul.user.js
+// сам скрипт берётся с raw.githubusercontent: кеш ~5 минут против 12 часов
+// у jsDelivr на ветке, а вес крошечный. Картинки — с CDN, но по тегу версии.
+// @updateURL    https://raw.githubusercontent.com/netherguy4/mist-overhaul/main/mist-overhaul.user.js
+// @downloadURL  https://raw.githubusercontent.com/netherguy4/mist-overhaul/main/mist-overhaul.user.js
 // --- портреты, дальше до конца блока правит build.py, руками не трогать ---
-// @resource     bride_amalia_milton_8thmarch https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/bride_amalia_milton_8thmarch.webp
-// @resource     caravaneer https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/caravaneer.webp
-// @resource     corvin https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/corvin.webp
-// @resource     cpt_tirim_mormont https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/cpt_tirim_mormont.webp
-// @resource     demandred https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/demandred.webp
-// @resource     ghost_boss_traun https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/ghost_boss_traun.webp
-// @resource     ghost_simon_kornish https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/ghost_simon_kornish.webp
-// @resource     guild_violett_tari https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/guild_violett_tari.webp
-// @resource     ifrit https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/ifrit.webp
-// @resource     indiana_lester https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/indiana_lester.webp
-// @resource     innkeeper https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/innkeeper.webp
-// @resource     lumberjack https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/lumberjack.webp
-// @resource     oracle https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/oracle.webp
-// @resource     overseas_koitira https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/overseas_koitira.webp
-// @resource     poacher_vargo https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/poacher_vargo.webp
-// @resource     postman https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/postman.webp
-// @resource     prisoner_toivo_beilish https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/prisoner_toivo_beilish.webp
-// @resource     rogue_boss_eshtar https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/rogue_boss_eshtar.webp
-// @resource     rogue_brun https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/rogue_brun.webp
-// @resource     rogue_girl_deina https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/rogue_girl_deina.webp
-// @resource     scientist_arvin_pottery_jr https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/scientist_arvin_pottery_jr.webp
-// @resource     white_mage https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/white_mage.webp
+// @resource     bride_amalia_milton_8thmarch https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@v2026.08.12.1630/extension/npc/bride_amalia_milton_8thmarch.webp
+// @resource     caravaneer https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@v2026.08.12.1630/extension/npc/caravaneer.webp
+// @resource     corvin https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@v2026.08.12.1630/extension/npc/corvin.webp
+// @resource     cpt_tirim_mormont https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@v2026.08.12.1630/extension/npc/cpt_tirim_mormont.webp
+// @resource     demandred https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@v2026.08.12.1630/extension/npc/demandred.webp
+// @resource     ghost_boss_traun https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@v2026.08.12.1630/extension/npc/ghost_boss_traun.webp
+// @resource     ghost_simon_kornish https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@v2026.08.12.1630/extension/npc/ghost_simon_kornish.webp
+// @resource     guild_violett_tari https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@v2026.08.12.1630/extension/npc/guild_violett_tari.webp
+// @resource     ifrit https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@v2026.08.12.1630/extension/npc/ifrit.webp
+// @resource     indiana_lester https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@v2026.08.12.1630/extension/npc/indiana_lester.webp
+// @resource     innkeeper https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@v2026.08.12.1630/extension/npc/innkeeper.webp
+// @resource     lumberjack https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@v2026.08.12.1630/extension/npc/lumberjack.webp
+// @resource     oracle https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@v2026.08.12.1630/extension/npc/oracle.webp
+// @resource     overseas_koitira https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@v2026.08.12.1630/extension/npc/overseas_koitira.webp
+// @resource     poacher_vargo https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@v2026.08.12.1630/extension/npc/poacher_vargo.webp
+// @resource     postman https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@v2026.08.12.1630/extension/npc/postman.webp
+// @resource     prisoner_toivo_beilish https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@v2026.08.12.1630/extension/npc/prisoner_toivo_beilish.webp
+// @resource     rogue_boss_eshtar https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@v2026.08.12.1630/extension/npc/rogue_boss_eshtar.webp
+// @resource     rogue_brun https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@v2026.08.12.1630/extension/npc/rogue_brun.webp
+// @resource     rogue_girl_deina https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@v2026.08.12.1630/extension/npc/rogue_girl_deina.webp
+// @resource     scientist_arvin_pottery_jr https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@v2026.08.12.1630/extension/npc/scientist_arvin_pottery_jr.webp
+// @resource     white_mage https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@v2026.08.12.1630/extension/npc/white_mage.webp
 // ==/UserScript==
 
 (() => {

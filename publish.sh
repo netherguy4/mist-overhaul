@@ -1,18 +1,23 @@
 #!/bin/bash
-# Собрать, запушить и сбросить кеш jsDelivr, иначе обновление доедет до игроков
-# в течение 12 часов вместо минуты.
+# Собрать, закоммитить и запушить вместе с тегом версии.
+#
+# Тег обязателен: @resource в скрипте ссылаются на cdn.jsdelivr.net/...@vВЕРСИЯ,
+# и тег должен указывать ровно на тот коммит, где лежат эти картинки. Ссылка на
+# тег для jsDelivr неизменяема и кешируется навсегда, поэтому устаревший файл
+# игроку прийти не может — в отличие от ветки @main, где кеш живёт до 12 часов,
+# а purge.jsdelivr.net срабатывает через раз.
 set -e
 cd "$(dirname "$0")"
 
 .venv/bin/python build.py
+
+version=$(grep -m1 '^// @version' mist-overhaul.user.js | awk '{print $3}')
+[ -n "$version" ] || { echo "не нашёл @version в скрипте"; exit 1; }
+
 git add -A
 git diff --cached --quiet && { echo "нечего публиковать"; exit 0; }
 git commit -m "${1:-обновление портретов}"
-git push
+git tag "v$version"
+git push --follow-tags
 
-echo "сброс кеша jsDelivr:"
-grep -hoE 'https://cdn\.jsdelivr\.net/\S+' mist-overhaul.user.js | sort -u |
-  sed 's|https://cdn\.jsdelivr\.net|https://purge.jsdelivr.net|' |
-  while read -r u; do
-    printf '  %-40s %s\n' "${u##*/}" "$(curl -s -m 60 "$u" | grep -o '"status": *"[a-z]*"' | head -1)"
-  done
+echo "опубликовано v$version"

@@ -20,9 +20,16 @@ WORK = ROOT / "work"
 EXT_NPC = ROOT / "extension" / "npc"
 GIF = ROOT / "gif"
 
+REPO = "netherguy4/mist-overhaul"
+
 # Откуда Tampermonkey заберёт портреты при установке и обновлении скрипта.
 # Дальше они живут у него локально, в игру за ними никто не ходит.
-HOST = "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc"
+#
+# Ссылка прибита к тегу версии, а не к ветке: такие пути jsDelivr считает
+# неизменяемыми и кеширует навсегда, так что устаревший файл прийти не может.
+# На ветке @main он держит кеш до 12 часов, и purge.jsdelivr.net отрабатывает
+# ненадёжно — из 22 файлов разом обновились шесть.
+HOST = f"https://cdn.jsdelivr.net/gh/{REPO}@v{{version}}/extension/npc"
 
 OUT_H = 534          # 2x от игровых 181x267
 FPS = 24
@@ -206,7 +213,8 @@ def write_userscript(names):
     newest = max((EXT_NPC / f"{n}.webp").stat().st_mtime for n in names)
     version = time.strftime("%Y.%m.%d.%H%M", time.localtime(newest))
 
-    block = "\n".join(f"// @resource     {n} {HOST}/{n}.webp" for n in names)
+    host = HOST.format(version=version)
+    block = "\n".join(f"// @resource     {n} {host}/{n}.webp" for n in names)
     text = re.sub(r"^// @version.*$", f"// @version      {version}",
                   path.read_text(), count=1, flags=re.M)
     text = re.sub(r"^// --- портреты.*?(?=^// ==/UserScript==)",
