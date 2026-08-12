@@ -36,7 +36,8 @@ const sleep = ms => new Promise(r => setTimeout(r, ms));
   await sleep(400);
   check('смена персонажа подхвачена', el().dataset.mistOverhaul === 'caravaneer'
         && !el().querySelector('video.mist-overhaul')
-        && /caravaneer\.[0-9a-f]+\.webp/.test(css('backgroundImage')));
+        // адрес бывает и blob: из хранилища, и прямой с CDN — важны два слоя
+        && css('backgroundImage').split(/,(?=\s*url)/).length === 2);
 
   // портреты должны лечь в хранилище сами, без встречи с персонажем
   let n = 0;
