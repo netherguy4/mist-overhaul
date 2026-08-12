@@ -9,6 +9,7 @@ import json
 import re
 import shutil
 import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -25,11 +26,12 @@ REPO = "netherguy4/mist-overhaul"
 # Откуда Tampermonkey заберёт портреты при установке и обновлении скрипта.
 # Дальше они живут у него локально, в игру за ними никто не ходит.
 #
-# Ссылка прибита к тегу версии, а не к ветке: такие пути jsDelivr считает
-# неизменяемыми и кеширует навсегда, так что устаревший файл прийти не может.
-# На ветке @main он держит кеш до 12 часов, и purge.jsdelivr.net отрабатывает
-# ненадёжно — из 22 файлов разом обновились шесть.
-HOST = f"https://cdn.jsdelivr.net/gh/{REPO}@v{{version}}/extension/npc"
+# Ссылка прибита к коммиту, в котором эта картинка менялась в последний раз.
+# Два следствия: путь для jsDelivr неизменяем и устаревший файл прийти не может
+# (на ветке @main кеш живёт до 12 часов, а purge.jsdelivr.net отрабатывает
+# через раз), и у нетронутых портретов ссылка не меняется — Tampermonkey
+# перекачивает только то, что действительно поменялось.
+HOST = f"https://cdn.jsdelivr.net/gh/{REPO}@{{ref}}/extension/npc"
 
 OUT_H = 534          # 2x от игровых 181x267
 FPS = 24
@@ -197,9 +199,12 @@ def main():
     } for i, n in enumerate(sorted(names), 1)]
     (ROOT / "extension" / "rules.json").write_text(
         json.dumps(rules, indent=2, ensure_ascii=False) + "\n")
-    write_userscript(sorted(names))
-    print(f"\nrules.json + юзерскрипт: {len(rules)} персонажей")
+    print(f"\nrules.json: {len(rules)} персонажей")
     shutil.rmtree(WORK, ignore_errors=True)
+    # шапку юзерскрипта проставляет отдельный шаг: ссылки прибиваются к коммитам
+    # картинок, а их к этому моменту ещё нет — этим занимается publish.sh
+    if "--pin" in sys.argv:
+        write_userscript(sorted(names))
 
 
 def write_userscript(names):
@@ -210,11 +215,20 @@ def write_userscript(names):
     насколько свежая установка.
     """
     path = ROOT / "mist-overhaul.user.js"
-    newest = max((EXT_NPC / f"{n}.webp").stat().st_mtime for n in names)
-    version = time.strftime("%Y.%m.%d.%H%M", time.localtime(newest))
+    version = time.strftime("%Y.%m.%d.%H%M")
 
-    host = HOST.format(version=version)
-    block = "\n".join(f"// @resource     {n} {host}/{n}.webp" for n in names)
+    def pin(n):
+        rel = f"extension/npc/{n}.webp"
+        dirty = run(["git", "status", "--porcelain", "--", rel], cwd=ROOT).stdout
+        if dirty:
+            raise SystemExit(f"{rel} не закоммичен — ссылку не на что прибить.\n"
+                             "Запускать через ./publish.sh, он коммитит картинки "
+                             "до простановки ссылок.")
+        return run(["git", "log", "-1", "--format=%H", "--", rel],
+                   cwd=ROOT).stdout.decode().strip()
+
+    block = "\n".join(
+        f"// @resource     {n} {HOST.format(ref=pin(n))}/{n}.webp" for n in names)
     text = re.sub(r"^// @version.*$", f"// @version      {version}",
                   path.read_text(), count=1, flags=re.M)
     text = re.sub(r"^// --- портреты.*?(?=^// ==/UserScript==)",
