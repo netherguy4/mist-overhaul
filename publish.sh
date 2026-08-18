@@ -28,7 +28,7 @@ git push
 # @updateURL действительно отдаст новую версию.
 raw=https://codeberg.org/netherguy/mist-overhaul-script/raw/branch/main/mist-overhaul.user.js
 for i in $(seq 24); do
-  curl -sS "$raw" | grep -q "$ver" && {
+  [[ $(curl -sS "$raw") == *"$ver"* ]] && {
     echo "опубликовано $ver, Codeberg отдаёт её через $((i * 5)) с"
     exit 0
   }
