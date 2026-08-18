@@ -60,7 +60,9 @@ def content_box(video: Path, vw: int, vh: int):
     """Границы картинки внутри кадра: генератор кладёт её в 9:16 с чёрными полями."""
     g = raw(["-i", str(video), "-vf", "format=gray", "-frames:v", "1", "-pix_fmt", "gray"],
             vw, vh, 1)[0, :, :, 0].astype(np.float32)
-    rows, cols = g.mean(1), g.mean(0)
+    # по самому яркому пикселю строки, а не по среднему: у тёмного портрета
+    # средняя яркость первых строк ниже порога, и срезалась бы сама картинка
+    rows, cols = g.max(1), g.max(0)
     top = int(np.argmax(rows > BAR)); bot = vh - int(np.argmax(rows[::-1] > BAR))
     left = int(np.argmax(cols > BAR)); right = vw - int(np.argmax(cols[::-1] > BAR))
     # поля меньше процента считаем шумом, а не полями
@@ -109,7 +111,8 @@ def bridge(frames, i: int, j: int, w: int, h: int):
 
 
 def build(video: Path, still: Path, original: Path, name: str):
-    if fresh(name, video):
+    # апскейл тоже исходник: если видео не зациклилось, персонаж собирается из него
+    if fresh(name, video) and fresh(name, still):
         print(f"== {name}: уже собран")
         return name
     print(f"\n== {name}")
@@ -204,6 +207,11 @@ def build_still(still: Path, original: Path, name: str):
         print(f"== {name}: уже собран")
         return name
     ow, oh = dims(original)
+    # апскейл может лежать в 9:16 с чёрными полями — тем же кадром, что уходит
+    # генератору видео. Поля срезаем, иначе портрет выйдет сплющенным.
+    sw, sh = dims(still)
+    cx, cy, cw, ch = content_box(still, sw, sh)
+    crop = f"crop={cw}:{ch}:{cx}:{cy}," if (cw, ch) != (sw, sh) else ""
     sizes = []
     for tier, h in TIERS.items():
         w = round(h * ow / oh) // 2 * 2
@@ -211,7 +219,7 @@ def build_still(still: Path, original: Path, name: str):
         webp = EXT_NPC / tier / f"{name}.tmp"
         # один кадр весит копейки, поэтому без потерь вовсе
         run(["ffmpeg", "-v", "error", "-y", "-i", str(still),
-             "-vf", f"scale={w}:{h}", "-sws_flags", "lanczos",
+             "-vf", f"{crop}scale={w}:{h}", "-sws_flags", "lanczos",
              "-lossless", "1", "-f", "webp", str(webp)])
         webp = finalize(name, webp, "webp", tier)
         sizes.append(f"{tier} {webp.stat().st_size / 1e3:.0f}K")

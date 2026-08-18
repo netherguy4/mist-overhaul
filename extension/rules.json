@@ -5,7 +5,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/3x/bride_amalia_milton_8thmarch.5b7812c2.webm"
+        "extensionPath": "/npc/3x/bride_amalia_milton_8thmarch.202b834c.webm"
       }
     },
     "condition": {
@@ -21,7 +21,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/3x/caravaneer.9380e678.webp"
+        "extensionPath": "/npc/3x/caravaneer.2e58466e.webm"
       }
     },
     "condition": {
@@ -69,7 +69,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/3x/demandred.a36902b6.webp"
+        "extensionPath": "/npc/3x/demandred.02c5b758.webm"
       }
     },
     "condition": {
@@ -101,7 +101,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/3x/ghost_simon_kornish.98bd4091.webp"
+        "extensionPath": "/npc/3x/ghost_simon_kornish.6b126db2.webm"
       }
     },
     "condition": {
@@ -117,7 +117,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/3x/guild_violett_tari.c2049eec.webp"
+        "extensionPath": "/npc/3x/guild_violett_tari.2940d08c.webm"
       }
     },
     "condition": {
@@ -149,7 +149,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/3x/indiana_lester.a1ecf3ca.webp"
+        "extensionPath": "/npc/3x/indiana_lester.b1b9f024.webm"
       }
     },
     "condition": {
@@ -197,7 +197,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/3x/oracle.8ebb869c.webp"
+        "extensionPath": "/npc/3x/oracle.7474caeb.webm"
       }
     },
     "condition": {
@@ -213,7 +213,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/3x/overseas_koitira.36481417.webp"
+        "extensionPath": "/npc/3x/overseas_koitira.11f4ddff.webm"
       }
     },
     "condition": {
