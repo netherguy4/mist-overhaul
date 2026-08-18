@@ -21,23 +21,29 @@ const check = (label, ok) => {
 const el = () => host.firstElementChild;
 const css = p => getComputedStyle(el())[p];
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+// подмена асинхронная и ждёт хранилище, а его в это же время набивает
+// предзагрузка — на холодном прогоне это дольше секунды, поэтому не пауза
+const until = async cond => {
+  for (let i = 0; i < 100 && !cond(); i++) await sleep(100);
+  return cond();
+};
 
 (async () => {
   put('bride_amalia_milton_8thmarch');     // анимированный: <video> поверх
-  await sleep(400);
-  check('анимация подменена', el().dataset.mistOverhaul === 'bride_amalia_milton_8thmarch'
-        && !!el().querySelector('video.mist-overhaul'));
+  check('анимация подменена', await until(() =>
+        el().dataset.mistOverhaul === 'bride_amalia_milton_8thmarch'
+        && !!el().querySelector('video.mist-overhaul')));
   check('оригинал остался запасным слоем',
         /i\.mist-game\.ru\/npc\/bride_amalia_milton_8thmarch\.jpg/.test(css('backgroundImage')));
   // слоёв два, поэтому computed-значение повторяется под каждый
   check('масштаб под картинку 2x', /^(100% 100%)(, \1)*$/.test(css('backgroundSize')));
 
-  put('caravaneer');                  // статичный, и без перезагрузки страницы
-  await sleep(400);
-  check('смена персонажа подхвачена', el().dataset.mistOverhaul === 'caravaneer'
+  put('corvin');                      // статичный, и без перезагрузки страницы
+  check('смена персонажа подхвачена', await until(() =>
+        el().dataset.mistOverhaul === 'corvin'
         && !el().querySelector('video.mist-overhaul')
-        // адрес бывает и blob: из хранилища, и прямой с CDN — важны два слоя
-        && css('backgroundImage').split(/,(?=\s*url)/).length === 2);
+        // адрес бывает и blob: из хранилища, и прямой с зеркала — важны два слоя
+        && css('backgroundImage').split(/,(?=\s*url)/).length === 2));
 
   // портреты должны лечь в хранилище сами, без встречи с персонажем
   let n = 0;

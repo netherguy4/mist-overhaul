@@ -29,7 +29,9 @@ REPO = "netherguy4/mist-overhaul"
 # поменялась картинка — поменялось имя, и мимо любого кеша приходит новая.
 # Не поменялась — адрес прежний, и качать нечего. Ветка тут безопасна: под
 # одним и тем же адресом никогда не окажется другое содержимое.
-HOST = f"https://cdn.jsdelivr.net/gh/{REPO}@main/extension/npc"
+#
+# В скрипт идут только пути: хостов несколько (см. HOSTS в юзерскрипте), и он
+# перебирает их сам, потому что из РФ доступны не все.
 
 # Игровая рамка портрета — 181x267 CSS-пикселей. Отдаём три размера и выбираем
 # по devicePixelRatio: на обычном экране 3x пришлось бы ужимать втрое, и фильтр
@@ -266,7 +268,7 @@ def write_userscript(names):
     version = time.strftime("%Y.%m.%d.%H%M")
 
     def entry(n):
-        by_tier = ", ".join(f'"{t}": "{HOST}/{t}/{built(n, t).name}"' for t in TIERS)
+        by_tier = ", ".join(f'"{t}": "{t}/{built(n, t).name}"' for t in TIERS)
         return f"    {n}: {{{by_tier}}}"
     urls = ",\n".join(entry(n) for n in names)
 
