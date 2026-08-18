@@ -1,16 +1,17 @@
 // ==UserScript==
 // @name         Mist Overhaul
 // @namespace    https://github.com/netherguy4/mist-overhaul
-// @version      2026.08.18.1820
+// @version      2026.08.18.1828
 // @description  Анимированные портреты персонажей в Mist
 // @author       nether
 // @match        *://*.mist-game.ru/*
 // @run-at       document-start
 // @grant        none
-// сам скрипт берётся с raw.githubusercontent: кеш ~5 минут против 12 часов
-// у jsDelivr на ветке, а вес крошечный
-// @updateURL    https://raw.githubusercontent.com/netherguy4/mist-overhaul/main/mist-overhaul.user.js
-// @downloadURL  https://raw.githubusercontent.com/netherguy4/mist-overhaul/main/mist-overhaul.user.js
+// сам скрипт берётся с fastly.jsdelivr.net: raw.githubusercontent открывается
+// не у всех в РФ, а 12-часовой кеш ветки снимает purge — publish.sh выбивает
+// этот один файл после пуша и ждёт, пока зеркало отдаст новую версию
+// @updateURL    https://fastly.jsdelivr.net/gh/netherguy4/mist-overhaul@main/mist-overhaul.user.js
+// @downloadURL  https://fastly.jsdelivr.net/gh/netherguy4/mist-overhaul@main/mist-overhaul.user.js
 // ==/UserScript==
 
 (() => {
