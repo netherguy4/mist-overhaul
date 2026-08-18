@@ -1,21 +1,18 @@
 // ==UserScript==
 // @name         Mist Overhaul
 // @namespace    https://github.com/netherguy4/mist-overhaul
-// @version      2026.08.18.1842
+// @version      2026.08.18.1915
 // @description  Анимированные портреты персонажей в Mist
 // @author       nether
 // @match        *://*.mist-game.ru/*
 // @run-at       document-start
 // @grant        none
-// сам скрипт берётся с raw.githubusercontent: кеш ~5 минут против 12 часов
-// у jsDelivr на ветке, а вес крошечный.
-//
-// Переезд на jsDelivr ради тех, у кого raw не открывается, пробовали и
-// откатили: purge отвечает finished, а зеркало отдаёт старую версию и через
-// 12 минут; query-строку jsDelivr игнорирует, так что кеш ветки не обойти.
-// Кому raw недоступен — ставит руками с gcore.jsdelivr.net по тому же пути.
-// @updateURL    https://raw.githubusercontent.com/netherguy4/mist-overhaul/main/mist-overhaul.user.js
-// @downloadURL  https://raw.githubusercontent.com/netherguy4/mist-overhaul/main/mist-overhaul.user.js
+// сам скрипт раздаёт Codeberg: raw.githubusercontent открывается не у всех в
+// РФ, а jsDelivr держал бы ветку 12 часов — purge на это не годится, проверяли.
+// У Codeberg тот же профиль, что у raw: анонимно, text/plain, max-age=300.
+// Туда его кладёт publish.sh, отдельным репозиторием на один файл.
+// @updateURL    https://codeberg.org/netherguy/mist-overhaul-script/raw/branch/main/mist-overhaul.user.js
+// @downloadURL  https://codeberg.org/netherguy/mist-overhaul-script/raw/branch/main/mist-overhaul.user.js
 // ==/UserScript==
 
 (() => {
