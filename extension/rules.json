@@ -21,7 +21,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/3x/caravaneer.df3be187.webp"
+        "extensionPath": "/npc/3x/caravaneer.9380e678.webp"
       }
     },
     "condition": {
@@ -53,7 +53,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/3x/cpt_tirim_mormont.5fe81384.webp"
+        "extensionPath": "/npc/3x/cpt_tirim_mormont.146d5a06.webp"
       }
     },
     "condition": {
@@ -69,7 +69,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/3x/demandred.f61e2f92.webp"
+        "extensionPath": "/npc/3x/demandred.a36902b6.webp"
       }
     },
     "condition": {
@@ -85,7 +85,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/3x/ghost_boss_traun.8155df8d.webp"
+        "extensionPath": "/npc/3x/ghost_boss_traun.c0865292.webp"
       }
     },
     "condition": {
@@ -101,7 +101,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/3x/ghost_simon_kornish.a97aea42.webp"
+        "extensionPath": "/npc/3x/ghost_simon_kornish.98bd4091.webp"
       }
     },
     "condition": {
@@ -117,7 +117,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/3x/guild_violett_tari.be0f55eb.webp"
+        "extensionPath": "/npc/3x/guild_violett_tari.c2049eec.webp"
       }
     },
     "condition": {
@@ -133,7 +133,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/3x/ifrit.1f11e127.webp"
+        "extensionPath": "/npc/3x/ifrit.f5db6560.webp"
       }
     },
     "condition": {
@@ -149,7 +149,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/3x/indiana_lester.55dad1d2.webp"
+        "extensionPath": "/npc/3x/indiana_lester.a1ecf3ca.webp"
       }
     },
     "condition": {
@@ -165,7 +165,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/3x/innkeeper.cff3773d.webp"
+        "extensionPath": "/npc/3x/innkeeper.4633aff4.webp"
       }
     },
     "condition": {
@@ -181,7 +181,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/3x/lumberjack.a9c9d041.webp"
+        "extensionPath": "/npc/3x/lumberjack.aa9bd73e.webp"
       }
     },
     "condition": {
@@ -197,7 +197,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/3x/oracle.b48931d6.webp"
+        "extensionPath": "/npc/3x/oracle.8ebb869c.webp"
       }
     },
     "condition": {
@@ -213,7 +213,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/3x/overseas_koitira.4176e79e.webp"
+        "extensionPath": "/npc/3x/overseas_koitira.36481417.webp"
       }
     },
     "condition": {
@@ -229,7 +229,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/3x/poacher_vargo.b553b3b2.webp"
+        "extensionPath": "/npc/3x/poacher_vargo.5c7fb77e.webp"
       }
     },
     "condition": {
@@ -245,7 +245,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/3x/postman.c4b73980.webp"
+        "extensionPath": "/npc/3x/postman.a660e171.webp"
       }
     },
     "condition": {
@@ -277,7 +277,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/3x/rogue_boss_eshtar.5fd83653.webp"
+        "extensionPath": "/npc/3x/rogue_boss_eshtar.e991ff5b.webp"
       }
     },
     "condition": {
@@ -293,7 +293,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/3x/rogue_brun.99500840.webp"
+        "extensionPath": "/npc/3x/rogue_brun.82c1714e.webp"
       }
     },
     "condition": {
@@ -309,7 +309,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/3x/rogue_girl_deina.898102bd.webp"
+        "extensionPath": "/npc/3x/rogue_girl_deina.28382d46.webp"
       }
     },
     "condition": {
@@ -325,7 +325,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/npc/3x/scientist_arvin_pottery_jr.9baa2dab.webp"
+        "extensionPath": "/npc/3x/scientist_arvin_pottery_jr.ba215311.webp"
       }
     },
     "condition": {

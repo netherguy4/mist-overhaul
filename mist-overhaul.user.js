@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mist Overhaul
 // @namespace    https://github.com/netherguy4/mist-overhaul
-// @version      2026.08.12.2037
+// @version      2026.08.18.1306
 // @description  Анимированные портреты персонажей в Mist
 // @author       nether
 // @match        *://*.mist-game.ru/*
@@ -29,26 +29,26 @@
   // --- ссылки на портреты, дальше до конца блока правит build.py ---
   const URLS = {
     bride_amalia_milton_8thmarch: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/bride_amalia_milton_8thmarch.4e996156.webm", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/bride_amalia_milton_8thmarch.5b7812c2.webm"},
-    caravaneer: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/caravaneer.ab604c7b.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/caravaneer.df3be187.webp"},
+    caravaneer: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/caravaneer.2d665b85.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/caravaneer.9380e678.webp"},
     corvin: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/corvin.a2092c7b.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/corvin.bf3fed7f.webp"},
-    cpt_tirim_mormont: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/cpt_tirim_mormont.cdfc20ca.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/cpt_tirim_mormont.5fe81384.webp"},
-    demandred: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/demandred.b973b627.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/demandred.f61e2f92.webp"},
-    ghost_boss_traun: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/ghost_boss_traun.55da66de.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/ghost_boss_traun.8155df8d.webp"},
-    ghost_simon_kornish: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/ghost_simon_kornish.48b3db15.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/ghost_simon_kornish.a97aea42.webp"},
-    guild_violett_tari: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/guild_violett_tari.883b8c87.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/guild_violett_tari.be0f55eb.webp"},
-    ifrit: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/ifrit.cda3abf1.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/ifrit.1f11e127.webp"},
-    indiana_lester: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/indiana_lester.d47c3775.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/indiana_lester.55dad1d2.webp"},
-    innkeeper: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/innkeeper.fe19e8b4.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/innkeeper.cff3773d.webp"},
-    lumberjack: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/lumberjack.a9517d8e.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/lumberjack.a9c9d041.webp"},
-    oracle: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/oracle.980adb81.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/oracle.b48931d6.webp"},
-    overseas_koitira: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/overseas_koitira.ec2632f6.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/overseas_koitira.4176e79e.webp"},
-    poacher_vargo: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/poacher_vargo.7d01dd1f.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/poacher_vargo.b553b3b2.webp"},
-    postman: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/postman.540a5072.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/postman.c4b73980.webp"},
+    cpt_tirim_mormont: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/cpt_tirim_mormont.d9d3867f.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/cpt_tirim_mormont.146d5a06.webp"},
+    demandred: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/demandred.140c59af.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/demandred.a36902b6.webp"},
+    ghost_boss_traun: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/ghost_boss_traun.41ce6c86.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/ghost_boss_traun.c0865292.webp"},
+    ghost_simon_kornish: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/ghost_simon_kornish.5267eb85.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/ghost_simon_kornish.98bd4091.webp"},
+    guild_violett_tari: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/guild_violett_tari.4c0a65ad.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/guild_violett_tari.c2049eec.webp"},
+    ifrit: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/ifrit.16378a84.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/ifrit.f5db6560.webp"},
+    indiana_lester: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/indiana_lester.486478de.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/indiana_lester.a1ecf3ca.webp"},
+    innkeeper: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/innkeeper.d1d7bfa3.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/innkeeper.4633aff4.webp"},
+    lumberjack: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/lumberjack.c492abd8.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/lumberjack.aa9bd73e.webp"},
+    oracle: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/oracle.a09dd068.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/oracle.8ebb869c.webp"},
+    overseas_koitira: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/overseas_koitira.1a1f2bc9.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/overseas_koitira.36481417.webp"},
+    poacher_vargo: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/poacher_vargo.2531e493.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/poacher_vargo.5c7fb77e.webp"},
+    postman: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/postman.74a8bc0b.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/postman.a660e171.webp"},
     prisoner_toivo_beilish: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/prisoner_toivo_beilish.a3bb7d4a.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/prisoner_toivo_beilish.b7e22af7.webp"},
-    rogue_boss_eshtar: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/rogue_boss_eshtar.5ad82356.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/rogue_boss_eshtar.5fd83653.webp"},
-    rogue_brun: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/rogue_brun.c59a36f7.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/rogue_brun.99500840.webp"},
-    rogue_girl_deina: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/rogue_girl_deina.ebcb7a95.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/rogue_girl_deina.898102bd.webp"},
-    scientist_arvin_pottery_jr: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/scientist_arvin_pottery_jr.3edb4eb4.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/scientist_arvin_pottery_jr.9baa2dab.webp"},
+    rogue_boss_eshtar: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/rogue_boss_eshtar.360c11ff.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/rogue_boss_eshtar.e991ff5b.webp"},
+    rogue_brun: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/rogue_brun.196f85aa.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/rogue_brun.82c1714e.webp"},
+    rogue_girl_deina: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/rogue_girl_deina.28076e4a.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/rogue_girl_deina.28382d46.webp"},
+    scientist_arvin_pottery_jr: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/scientist_arvin_pottery_jr.e060d7e2.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/scientist_arvin_pottery_jr.ba215311.webp"},
     white_mage: {"2x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/2x/white_mage.047cffed.webp", "3x": "https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc/3x/white_mage.ee2d73db.webp"},
   };
   // --- конец блока ---
