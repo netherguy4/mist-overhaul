@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mist Overhaul
 // @namespace    https://github.com/netherguy4/mist-overhaul
-// @version      2026.08.18.1915
+// @version      2026.08.22.1530
 // @description  Анимированные портреты персонажей в Mist
 // @author       nether
 // @match        *://*.mist-game.ru/*
@@ -31,27 +31,27 @@
   // --- ссылки на портреты, дальше до конца блока правит build.py ---
   const URLS = {
     bride_amalia_milton_8thmarch: {"2x": "2x/bride_amalia_milton_8thmarch.fdbbe937.webm", "3x": "3x/bride_amalia_milton_8thmarch.202b834c.webm"},
-    caravaneer: {"2x": "2x/caravaneer.15d44026.webm", "3x": "3x/caravaneer.2e58466e.webm"},
-    corvin: {"2x": "2x/corvin.a2092c7b.webp", "3x": "3x/corvin.bf3fed7f.webp"},
-    cpt_tirim_mormont: {"2x": "2x/cpt_tirim_mormont.d9d3867f.webp", "3x": "3x/cpt_tirim_mormont.146d5a06.webp"},
+    caravaneer: {"2x": "2x/caravaneer.8a3a4992.webm", "3x": "3x/caravaneer.6e911852.webm"},
+    corvin: {"2x": "2x/corvin.c0f15317.webm", "3x": "3x/corvin.b8778f58.webm"},
+    cpt_tirim_mormont: {"2x": "2x/cpt_tirim_mormont.6e0e738a.webm", "3x": "3x/cpt_tirim_mormont.5163d0da.webm"},
     demandred: {"2x": "2x/demandred.904ebbad.webm", "3x": "3x/demandred.02c5b758.webm"},
-    ghost_boss_traun: {"2x": "2x/ghost_boss_traun.41ce6c86.webp", "3x": "3x/ghost_boss_traun.c0865292.webp"},
-    ghost_simon_kornish: {"2x": "2x/ghost_simon_kornish.ba75c970.webm", "3x": "3x/ghost_simon_kornish.6b126db2.webm"},
-    guild_violett_tari: {"2x": "2x/guild_violett_tari.d89abf3f.webm", "3x": "3x/guild_violett_tari.2940d08c.webm"},
-    ifrit: {"2x": "2x/ifrit.16378a84.webp", "3x": "3x/ifrit.f5db6560.webp"},
-    indiana_lester: {"2x": "2x/indiana_lester.0e4263a4.webm", "3x": "3x/indiana_lester.b1b9f024.webm"},
-    innkeeper: {"2x": "2x/innkeeper.d1d7bfa3.webp", "3x": "3x/innkeeper.4633aff4.webp"},
-    lumberjack: {"2x": "2x/lumberjack.c492abd8.webp", "3x": "3x/lumberjack.aa9bd73e.webp"},
-    oracle: {"2x": "2x/oracle.9619b07c.webm", "3x": "3x/oracle.7474caeb.webm"},
-    overseas_koitira: {"2x": "2x/overseas_koitira.11c9b661.webm", "3x": "3x/overseas_koitira.11f4ddff.webm"},
-    poacher_vargo: {"2x": "2x/poacher_vargo.2531e493.webp", "3x": "3x/poacher_vargo.5c7fb77e.webp"},
-    postman: {"2x": "2x/postman.74a8bc0b.webp", "3x": "3x/postman.a660e171.webp"},
-    prisoner_toivo_beilish: {"2x": "2x/prisoner_toivo_beilish.a3bb7d4a.webp", "3x": "3x/prisoner_toivo_beilish.b7e22af7.webp"},
-    rogue_boss_eshtar: {"2x": "2x/rogue_boss_eshtar.360c11ff.webp", "3x": "3x/rogue_boss_eshtar.e991ff5b.webp"},
-    rogue_brun: {"2x": "2x/rogue_brun.196f85aa.webp", "3x": "3x/rogue_brun.82c1714e.webp"},
-    rogue_girl_deina: {"2x": "2x/rogue_girl_deina.28076e4a.webp", "3x": "3x/rogue_girl_deina.28382d46.webp"},
-    scientist_arvin_pottery_jr: {"2x": "2x/scientist_arvin_pottery_jr.e060d7e2.webp", "3x": "3x/scientist_arvin_pottery_jr.ba215311.webp"},
-    white_mage: {"2x": "2x/white_mage.047cffed.webp", "3x": "3x/white_mage.ee2d73db.webp"},
+    ghost_boss_traun: {"2x": "2x/ghost_boss_traun.9dea8278.webm", "3x": "3x/ghost_boss_traun.3c31bb1b.webm"},
+    ghost_simon_kornish: {"2x": "2x/ghost_simon_kornish.73b8088b.webm", "3x": "3x/ghost_simon_kornish.c2b4b696.webm"},
+    guild_violett_tari: {"2x": "2x/guild_violett_tari.9463d60d.webm", "3x": "3x/guild_violett_tari.d68275f1.webm"},
+    ifrit: {"2x": "2x/ifrit.b581d0d6.webm", "3x": "3x/ifrit.c1e307f4.webm"},
+    indiana_lester: {"2x": "2x/indiana_lester.92b95e79.webm", "3x": "3x/indiana_lester.bfe423ec.webm"},
+    innkeeper: {"2x": "2x/innkeeper.5ff02954.webm", "3x": "3x/innkeeper.bcfeed9b.webm"},
+    lumberjack: {"2x": "2x/lumberjack.133323bc.webm", "3x": "3x/lumberjack.afb44538.webm"},
+    oracle: {"2x": "2x/oracle.c396239f.webm", "3x": "3x/oracle.96411739.webm"},
+    overseas_koitira: {"2x": "2x/overseas_koitira.0e6c3453.webm", "3x": "3x/overseas_koitira.eadce047.webm"},
+    poacher_vargo: {"2x": "2x/poacher_vargo.293b0b71.webm", "3x": "3x/poacher_vargo.de774094.webm"},
+    postman: {"2x": "2x/postman.f85074f9.webm", "3x": "3x/postman.0ba5b680.webm"},
+    prisoner_toivo_beilish: {"2x": "2x/prisoner_toivo_beilish.c6186ca1.webm", "3x": "3x/prisoner_toivo_beilish.75ae55b1.webm"},
+    rogue_boss_eshtar: {"2x": "2x/rogue_boss_eshtar.11570265.webm", "3x": "3x/rogue_boss_eshtar.b06000b6.webm"},
+    rogue_brun: {"2x": "2x/rogue_brun.be298cab.webm", "3x": "3x/rogue_brun.0bb338f4.webm"},
+    rogue_girl_deina: {"2x": "2x/rogue_girl_deina.b8bc8f9f.webm", "3x": "3x/rogue_girl_deina.b7001e6f.webm"},
+    scientist_arvin_pottery_jr: {"2x": "2x/scientist_arvin_pottery_jr.394cd7ca.webm", "3x": "3x/scientist_arvin_pottery_jr.97e6288a.webm"},
+    white_mage: {"2x": "2x/white_mage.16ae480c.webm", "3x": "3x/white_mage.69c642c6.webm"},
   };
   // --- конец блока ---
 
