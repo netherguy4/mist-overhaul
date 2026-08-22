@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mist Overhaul
 // @namespace    https://github.com/netherguy4/mist-overhaul
-// @version      2026.08.22.1530
+// @version      2026.08.22.1626
 // @description  Анимированные портреты персонажей в Mist
 // @author       nether
 // @match        *://*.mist-game.ru/*
@@ -150,6 +150,9 @@
     return blobs.get(path);
   }
 
+  /** Постер анимации: первый кадр под тем же хешем, что и webm. */
+  const poster = path => path.replace(/\.webm$/, '.webp');
+
   async function swapBg(el) {
     const cur = getComputedStyle(el).backgroundImage;
     const name = cur.match(NPC)?.[1];
@@ -168,8 +171,9 @@
       el.style.backgroundImage = `url(${src}), ${cur}`;
       return;
     }
-    // анимацию фоном не поставить, поэтому кладём <video> поверх; оригинал под
-    // ним виден, пока кадр не поехал
+    // анимацию фоном не поставить, поэтому кладём <video> поверх, а под него —
+    // постер с первым кадром: без него на кадр-два виден оригинал
+    el.style.backgroundImage = `url(${await source(poster(path))}), ${cur}`;
     const v = document.createElement('video');
     v.className = 'mist-overhaul';
     Object.assign(v, { src, autoplay: true, loop: true, muted: true, playsInline: true });
@@ -218,7 +222,8 @@
   async function prime() {
     await ready;
     if (!store) return;               // не защищённый контекст — работаем прямо с зеркала
-    const want = new Set(Object.values(URLS).map(v => v[TIER]));
+    const want = new Set(Object.values(URLS).flatMap(v =>
+      v[TIER].endsWith('.webm') ? [v[TIER], poster(v[TIER])] : [v[TIER]]));
     for (const req of await store.keys()) {
       if (!want.has(req.url.slice(KEY.length))) await store.delete(req);   // имя сменилось = старый файл
     }

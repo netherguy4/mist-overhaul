@@ -74,8 +74,13 @@ def content_box(video: Path, vw: int, vh: int):
 
 
 def built(name: str, tier: str = "3x"):
-    """Готовый файл персонажа в нужном размере, если он уже собран."""
-    return next((EXT_NPC / tier).glob(f"{name}.*.web[mp]"), None)
+    """Готовый файл персонажа в нужном размере, если он уже собран.
+
+    У анимации рядом лежит постер .webp с тем же хешем — сначала ищем webm,
+    иначе постер сошёл бы за статику.
+    """
+    return (next((EXT_NPC / tier).glob(f"{name}.*.webm"), None)
+            or next((EXT_NPC / tier).glob(f"{name}.*.webp"), None))
 
 
 def fresh(name: str, src: Path):
@@ -198,7 +203,15 @@ def build(video: Path, still: Path, original: Path, name: str):
              "-c:v", "libvpx-vp9", "-crf", "24", "-b:v", "0", "-row-mt", "1",
              "-pix_fmt", "yuv420p", "-an", "-f", "webm", str(out)], input=data)
         out = finalize(name, out, "webm", tier)
-        sizes.append(f"{tier} {w}x{h} {out.stat().st_size / 1e6:.2f}M")
+        # Постер — первый кадр под тем же хешем: юзерскрипт ставит его фоном,
+        # пока видео не декодировалось, иначе на кадр-два виден оригинал.
+        poster = out.with_suffix(".webp")
+        run(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb24",
+             "-s", f"{out_w}x{OUT_H}", "-i", "-", "-frames:v", "1",
+             "-vf", f"scale={w}:{h}", "-sws_flags", "lanczos",
+             "-quality", "90", "-f", "webp", str(poster)], input=loop[0].astype(np.uint8).tobytes())
+        sizes.append(f"{tier} {w}x{h} {out.stat().st_size / 1e6:.2f}M"
+                     f"+{poster.stat().st_size / 1e3:.0f}K")
     print(f"   {', '.join(sizes)}")
     return name
 
