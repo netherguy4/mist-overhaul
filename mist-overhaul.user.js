@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mist Overhaul
 // @namespace    https://github.com/netherguy4/mist-overhaul
-// @version      2026.08.22.1626
+// @version      2026.08.22.1733
 // @description  Анимированные портреты персонажей в Mist
 // @author       nether
 // @match        *://*.mist-game.ru/*
@@ -35,7 +35,7 @@
     corvin: {"2x": "2x/corvin.c0f15317.webm", "3x": "3x/corvin.b8778f58.webm"},
     cpt_tirim_mormont: {"2x": "2x/cpt_tirim_mormont.6e0e738a.webm", "3x": "3x/cpt_tirim_mormont.5163d0da.webm"},
     demandred: {"2x": "2x/demandred.904ebbad.webm", "3x": "3x/demandred.02c5b758.webm"},
-    ghost_boss_traun: {"2x": "2x/ghost_boss_traun.9dea8278.webm", "3x": "3x/ghost_boss_traun.3c31bb1b.webm"},
+    ghost_boss_traun: {"2x": "2x/ghost_boss_traun.15b6aa95.webm", "3x": "3x/ghost_boss_traun.334721b4.webm"},
     ghost_simon_kornish: {"2x": "2x/ghost_simon_kornish.73b8088b.webm", "3x": "3x/ghost_simon_kornish.c2b4b696.webm"},
     guild_violett_tari: {"2x": "2x/guild_violett_tari.9463d60d.webm", "3x": "3x/guild_violett_tari.d68275f1.webm"},
     ifrit: {"2x": "2x/ifrit.b581d0d6.webm", "3x": "3x/ifrit.c1e307f4.webm"},
