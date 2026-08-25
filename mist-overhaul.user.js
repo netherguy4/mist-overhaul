@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mist Overhaul
 // @namespace    https://github.com/netherguy4/mist-overhaul
-// @version      2026.08.26.0248
+// @version      2026.08.26.0254
 // @description  Анимированные портреты персонажей в Mist
 // @author       nether
 // @match        *://*.mist-game.ru/*
@@ -89,7 +89,6 @@
   const ready = self.caches ? caches.open(CACHE).then(c => (store = c), () => {})
                             : Promise.resolve();
   const blobs = new Map();              // адрес -> blob:, только для показанных
-  let detachedVideo;
 
   function pick(at) {
     localStorage.mistOverhaulHost = host = at;
@@ -175,15 +174,11 @@
     // анимацию фоном не поставить, поэтому кладём <video> поверх, а под него —
     // постер с первым кадром: без него на кадр-два виден оригинал
     el.style.backgroundImage = `url(${await source(poster(path))}), ${cur}`;
-    const v = detachedVideo?.dataset.npc === name ? detachedVideo : document.createElement('video');
-    detachedVideo = null;
-    if (!v.className) {
-      v.className = 'mist-overhaul';
-      v.dataset.npc = name;
-      Object.assign(v, { src, autoplay: true, loop: true, muted: true, playsInline: true });
-      v.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;'
-                      + 'object-fit:fill;pointer-events:none';
-    }
+    const v = document.createElement('video');
+    v.className = 'mist-overhaul';
+    Object.assign(v, { src, autoplay: true, loop: true, muted: true, playsInline: true });
+    v.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;'
+                    + 'object-fit:fill;pointer-events:none';
     if (getComputedStyle(el).position === 'static') el.style.position = 'relative';
     el.appendChild(v);
   }
@@ -213,11 +208,6 @@
       if (r.type === 'attributes') {
         r.target.tagName === 'IMG' ? swapImg(r.target) : swapBg(r.target);
       } else {
-        r.removedNodes.forEach(n => {
-          const v = n.nodeType === 1 && (n.matches('video.mist-overhaul')
-            ? n : n.querySelector('video.mist-overhaul'));
-          if (v) detachedVideo = v;
-        });
         r.addedNodes.forEach(n => { scan(n); if (n.nodeType === 1) swapBg(n); });
       }
     }
