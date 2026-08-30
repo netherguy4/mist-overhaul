@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mist Overhaul
 // @namespace    https://github.com/netherguy4/mist-overhaul
-// @version      2026.08.26.0258
+// @version      2026.08.30.0438
 // @description  Анимированные портреты персонажей в Mist
 // @author       nether
 // @match        *://*.mist-game.ru/*
@@ -37,6 +37,7 @@
     demandred: {"2x": "2x/demandred.904ebbad.webm", "3x": "3x/demandred.02c5b758.webm"},
     ghost_boss_traun: {"2x": "2x/ghost_boss_traun.15b6aa95.webm", "3x": "3x/ghost_boss_traun.334721b4.webm"},
     ghost_simon_kornish: {"2x": "2x/ghost_simon_kornish.73b8088b.webm", "3x": "3x/ghost_simon_kornish.c2b4b696.webm"},
+    gorkonia: {"2x": "2x/gorkonia.0c4d4fe1.webm", "3x": "3x/gorkonia.90fd7a3b.webm"},
     guild_violett_tari: {"2x": "2x/guild_violett_tari.9463d60d.webm", "3x": "3x/guild_violett_tari.d68275f1.webm"},
     ifrit: {"2x": "2x/ifrit.b581d0d6.webm", "3x": "3x/ifrit.c1e307f4.webm"},
     indiana_lester: {"2x": "2x/indiana_lester.92b95e79.webm", "3x": "3x/indiana_lester.bfe423ec.webm"},

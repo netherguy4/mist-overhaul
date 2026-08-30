@@ -1,7 +1,7 @@
 <!doctype html><meta charset=utf-8><title>Mist Overhaul — проверка юзерскрипта</title>
 <!-- Отдать по http (на file:// не поедет <script src>) и открыть с новым
      query-параметром, иначе браузер подсунет закешированный скрипт.
-     Ждать пять PASS; первый прогон качает ~54 МБ, дальше берёт из хранилища. -->
+     Ждать семь PASS; первый прогон качает ~54 МБ, дальше берёт из хранилища. -->
 <script src="../mist-overhaul.user.js"></script>
 
 <div id="host"></div>
@@ -11,7 +11,7 @@
 const host = document.getElementById('host');
 const out = document.getElementById('out');
 const put = npc => host.innerHTML =
-  `<div class="userpic" style="background: url(//i.mist-game.ru/npc/${npc}.jpg); border: 1px solid #f1e8c9;"></div>`;
+  `<div class="userpic" style="width:181px;height:267px;background:url(//i.mist-game.ru/npc/${npc}.jpg);border:1px solid #f1e8c9;"></div>`;
 
 const log = [];
 const check = (label, ok) => {
@@ -56,13 +56,19 @@ const until = async cond => {
         // адрес бывает и blob: из хранилища, и прямой с зеркала — важны два слоя
         && css('backgroundImage').split(/,(?=\s*url)/).length === 2));
 
+  put('gorkonia');                    // новый персонаж и его анимация
+  check('анимация Горконии подменена', await until(() =>
+        el().dataset.mistOverhaul === 'gorkonia'
+        && el().querySelector('video.mist-overhaul')?.dataset.npc === 'gorkonia'
+        && css('backgroundImage').split(/,(?=\s*url)/).length === 2));
+
   // портреты должны лечь в хранилище сами, без встречи с персонажем
   let n = 0;
-  for (let i = 0; i < 90 && n < 22; i++) {
+  for (let i = 0; i < 90 && n < 46; i++) {
     await sleep(2000);
     n = (await (await caches.open('mist-overhaul')).keys()).length;
-    out.textContent = log.join('\n') + `\n… в хранилище ${n} из 22`;
+    out.textContent = log.join('\n') + `\n… в хранилище ${n} из 46`;
   }
-  check(`предзагрузка всех портретов (в хранилище ${n})`, n >= 22);
+  check(`предзагрузка всех файлов портретов (в хранилище ${n})`, n >= 46);
 })();
 </script>

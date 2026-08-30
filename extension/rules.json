@@ -117,6 +117,22 @@
     "action": {
       "type": "redirect",
       "redirect": {
+        "extensionPath": "/npc/3x/gorkonia.90fd7a3b.webm"
+      }
+    },
+    "condition": {
+      "urlFilter": "||i.mist-game.ru/npc/gorkonia.jpg",
+      "resourceTypes": [
+        "image"
+      ]
+    }
+  },
+  {
+    "id": 9,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
         "extensionPath": "/npc/3x/guild_violett_tari.d68275f1.webm"
       }
     },
@@ -128,7 +144,7 @@
     }
   },
   {
-    "id": 9,
+    "id": 10,
     "priority": 1,
     "action": {
       "type": "redirect",
@@ -144,7 +160,7 @@
     }
   },
   {
-    "id": 10,
+    "id": 11,
     "priority": 1,
     "action": {
       "type": "redirect",
@@ -160,7 +176,7 @@
     }
   },
   {
-    "id": 11,
+    "id": 12,
     "priority": 1,
     "action": {
       "type": "redirect",
@@ -176,7 +192,7 @@
     }
   },
   {
-    "id": 12,
+    "id": 13,
     "priority": 1,
     "action": {
       "type": "redirect",
@@ -192,7 +208,7 @@
     }
   },
   {
-    "id": 13,
+    "id": 14,
     "priority": 1,
     "action": {
       "type": "redirect",
@@ -208,7 +224,7 @@
     }
   },
   {
-    "id": 14,
+    "id": 15,
     "priority": 1,
     "action": {
       "type": "redirect",
@@ -224,7 +240,7 @@
     }
   },
   {
-    "id": 15,
+    "id": 16,
     "priority": 1,
     "action": {
       "type": "redirect",
@@ -240,7 +256,7 @@
     }
   },
   {
-    "id": 16,
+    "id": 17,
     "priority": 1,
     "action": {
       "type": "redirect",
@@ -256,7 +272,7 @@
     }
   },
   {
-    "id": 17,
+    "id": 18,
     "priority": 1,
     "action": {
       "type": "redirect",
@@ -272,7 +288,7 @@
     }
   },
   {
-    "id": 18,
+    "id": 19,
     "priority": 1,
     "action": {
       "type": "redirect",
@@ -288,7 +304,7 @@
     }
   },
   {
-    "id": 19,
+    "id": 20,
     "priority": 1,
     "action": {
       "type": "redirect",
@@ -304,7 +320,7 @@
     }
   },
   {
-    "id": 20,
+    "id": 21,
     "priority": 1,
     "action": {
       "type": "redirect",
@@ -320,7 +336,7 @@
     }
   },
   {
-    "id": 21,
+    "id": 22,
     "priority": 1,
     "action": {
       "type": "redirect",
@@ -336,7 +352,7 @@
     }
   },
   {
-    "id": 22,
+    "id": 23,
     "priority": 1,
     "action": {
       "type": "redirect",
