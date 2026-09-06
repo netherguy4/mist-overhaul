@@ -1,10 +1,13 @@
 // ==UserScript==
 // @name         Mist Overhaul
 // @namespace    https://github.com/netherguy4/mist-overhaul
-// @version      2026.08.30.0438
+// @version      2026.09.06.1343
 // @description  Анимированные портреты персонажей в Mist
 // @author       nether
 // @match        *://*.mist-game.ru/*
+// @match        https://templars-clan.online/*
+// @match        https://www.templars-clan.online/*
+// @match        https://mist.dev.nether.pp.ua/*
 // @run-at       document-start
 // @grant        none
 // сам скрипт раздаёт Codeberg: raw.githubusercontent открывается не у всех в
@@ -17,6 +20,24 @@
 
 (() => {
   'use strict';
+
+  // На сайте клана нужна только версия: портреты и их кеш здесь не трогаем.
+  if (['https://templars-clan.online', 'https://www.templars-clan.online', 'https://mist.dev.nether.pp.ua'].includes(location.origin)) {
+    window.addEventListener('message', (event) => {
+      if (event.source !== window || event.origin !== location.origin) return;
+      const request = event.data;
+      if (!request || request.type !== 'mist-clan:check-extension' || request.slug !== 'mist-overhaul') return;
+      if (typeof request.requestId !== 'string' || request.requestId.length > 64 || typeof GM_info === 'undefined') return;
+      window.postMessage({
+        type: 'mist-clan:extension-status',
+        requestId: request.requestId,
+        slug: 'mist-overhaul',
+        version: GM_info.script.version,
+        manager: GM_info.scriptHandler || ''
+      }, location.origin);
+    });
+    return;
+  }
 
   // Портреты не через @resource: Tampermonkey держал их с первой установки и не
   // перекачивал даже после смены ссылок — в игре отдавал сборку, которой на CDN
