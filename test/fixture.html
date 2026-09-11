@@ -1,7 +1,7 @@
-<!doctype html><meta charset=utf-8><title>Mist Overhaul — проверка юзерскрипта</title>
+<!doctype html><meta charset=utf-8><meta name="viewport" content="width=device-width, initial-scale=1"><style>pre { white-space: pre-wrap; }</style><title>Mist Overhaul — проверка юзерскрипта</title>
 <!-- Отдать по http (на file:// не поедет <script src>) и открыть с новым
      query-параметром, иначе браузер подсунет закешированный скрипт.
-     Ждать семь PASS; первый прогон качает ~54 МБ, дальше берёт из хранилища. -->
+     Ждать все PASS; первый прогон качает ~54 МБ, дальше берёт из хранилища. -->
 <script src="../mist-overhaul.user.js"></script>
 
 <div id="host"></div>
@@ -61,6 +61,47 @@ const until = async cond => {
         el().dataset.mistOverhaul === 'gorkonia'
         && el().querySelector('video.mist-overhaul')?.dataset.npc === 'gorkonia'
         && css('backgroundImage').split(/,(?=\s*url)/).length === 2));
+
+  const field = document.createElement('div');
+  field.className = 'userpic';
+  field.style.cssText = 'position:relative;width:181px;height:267px;background:url(https://i.mist-game.ru//units/m/298.jpg?v=39)';
+  host.replaceChildren(field);
+  check('боевой портрет Симона заменён видео', await until(() =>
+    field.querySelector('video')?.dataset.npc === 'ghost_simon_kornish'));
+  field.style.backgroundImage = 'url(https://i.mist-game.ru//units/m/999999.jpg?v=39)';
+  check('при смене на неизвестного противника старое видео удаляется', await until(() =>
+    !field.querySelector('video') && !field.dataset.mistOverhaul));
+  field.style.backgroundImage = 'url(https://i.mist-game.ru//units/m/298.jpg?v=40)';
+  check('возврат к Симону запускает видео', await until(() =>
+    field.querySelector('video')?.dataset.npc === 'ghost_simon_kornish'));
+  field.style.backgroundImage = 'url(https://i.mist-game.ru//units/m/298.jpg?v=41)';
+  check('перезапись фона того же противника сохраняет один видеослой', await until(() =>
+    field.querySelectorAll('video').length === 1 && field.style.backgroundImage.includes('blob:')));
+  field.style.backgroundImage = 'url(https://i.mist-game.ru/npc/corvin.jpg)';
+  await Promise.resolve();
+  field.style.backgroundImage = 'url(https://i.mist-game.ru//units/m/999999.jpg)';
+  await sleep(100);
+  check('запоздалый ответ не перекрывает нового противника',
+    !field.querySelector('video') && !field.dataset.mistOverhaul);
+  field.style.backgroundImage = 'url(https://i.mist-game.ru//units/m/298.jpg?v=39)';
+
+  for (const [id, name] of [
+    [215, 'gorkonia'], [216, 'demandred'], [294, 'indiana_lester'],
+    [295, 'rogue_brun'], [296, 'prisoner_toivo_beilish'],
+    [297, 'rogue_girl_deina'], [298, 'ghost_simon_kornish'],
+  ]) {
+    field.style.backgroundImage = `url(https://i.mist-game.ru//units/m/${id}.jpg?v=39)`;
+    check(`боевой ID ${id} → ${name}`, await until(() =>
+      field.querySelector('video')?.dataset.npc === name));
+  }
+
+  for (const [id, name] of [
+    [219, 'demandred'], [220, 'gorkonia'], [304, 'caravaneer'], [422, 'white_mage'],
+  ]) {
+    field.style.backgroundImage = `url(https://i.mist-game.ru//m/m/${id}.jpg?v=39)`;
+    check(`портрет монстра ${id} → ${name}`, await until(() =>
+      field.querySelector('video')?.dataset.npc === name));
+  }
 
   // портреты должны лечь в хранилище сами, без встречи с персонажем
   let n = 0;

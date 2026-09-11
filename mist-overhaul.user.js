@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mist Overhaul
 // @namespace    https://github.com/netherguy4/mist-overhaul
-// @version      2026.09.06.1343
+// @version      2026.09.11.1326
 // @description  Анимированные портреты персонажей в Mist
 // @author       nether
 // @match        *://*.mist-game.ru/*
@@ -84,6 +84,27 @@
   const TIER = devicePixelRatio < 2.25 ? '2x' : '3x';
 
   const NPC = /\/npc\/([a-z0-9_]+)\.(?:jpe?g|png)/i;
+  // На поле игра использует числовые ID вместо имён из /npc/.
+  const UNITS = {
+    215: 'gorkonia',
+    216: 'demandred',
+    294: 'indiana_lester',
+    295: 'rogue_brun',
+    296: 'prisoner_toivo_beilish',
+    297: 'rogue_girl_deina',
+    298: 'ghost_simon_kornish',
+  };
+  const MONSTERS = {
+    219: 'demandred',
+    220: 'gorkonia',
+    304: 'caravaneer',
+    422: 'white_mage',
+  };
+  const PORTRAITS = '[style*="/npc/"], [style*="/units/m/"], [style*="/m/m/"]';
+  const npcName = value => value.match(NPC)?.[1]
+    || UNITS[value.match(/\/units\/m\/(\d+)\.(?:jpe?g|png)(?=[?"\s)]|$)/i)?.[1]]
+    || MONSTERS[value.match(/\/m\/m\/(\d+)\.(?:jpe?g|png)(?=[?"\s)]|$)/i)?.[1]];
+  const backgrounds = new WeakMap();
   const CACHE = 'mist-overhaul';
 
   // Одно и то же содержимое на нескольких зеркалах: из РФ jsDelivr достаётся
@@ -178,25 +199,46 @@
 
   async function swapBg(el) {
     const cur = getComputedStyle(el).backgroundImage;
-    const name = cur.match(NPC)?.[1];
-    if (!name || el.dataset.mistOverhaul === name) return;
+    const name = npcName(cur);
+    const previous = backgrounds.get(el);
+    if (previous && cur === previous.rendered) return;
     const path = URLS[name]?.[TIER];
-    if (!path) return;                 // персонажа ещё не рисовали — остаётся оригинал
+    if (previous) {
+      backgrounds.delete(el);
+      el.querySelector('video.mist-overhaul')?.remove();
+      delete el.dataset.mistOverhaul;
+      el.style.backgroundSize = previous.size;
+      el.style.backgroundRepeat = previous.repeat;
+      el.style.position = previous.position;
+    }
+    if (!path) return;
+    const state = {
+      rendered: cur, size: el.style.backgroundSize,
+      repeat: el.style.backgroundRepeat, position: el.style.position,
+    };
+    backgrounds.set(el, state);
+    const current = () => backgrounds.get(el) === state
+      && getComputedStyle(el).backgroundImage === state.rendered;
     el.dataset.mistOverhaul = name;
     // в игре стоит background-size: auto, а наши картинки вдвое крупнее
     el.style.backgroundSize = '100% 100%';
     el.style.backgroundRepeat = 'no-repeat';
     const src = await source(path);
+    if (!current()) return;
 
     el.querySelector('video.mist-overhaul')?.remove();
     if (!path.endsWith('.webm')) {
       // статичный портрет — обычным фоном, оригинал остаётся нижним слоем
       el.style.backgroundImage = `url(${src}), ${cur}`;
+      state.rendered = getComputedStyle(el).backgroundImage;
       return;
     }
     // анимацию фоном не поставить, поэтому кладём <video> поверх, а под него —
     // постер с первым кадром: без него на кадр-два виден оригинал
-    el.style.backgroundImage = `url(${await source(poster(path))}), ${cur}`;
+    const still = await source(poster(path));
+    if (!current()) return;
+    el.style.backgroundImage = `url(${still}), ${cur}`;
+    state.rendered = getComputedStyle(el).backgroundImage;
     let v = detachedVideo?.dataset.npc === name ? detachedVideo : null;
     detachedVideo = null;
     if (!v) {
@@ -227,7 +269,7 @@
 
   function scan(root) {
     if (!root.querySelectorAll) return;
-    root.querySelectorAll('[style*="/npc/"]').forEach(swapBg);
+    root.querySelectorAll(PORTRAITS).forEach(swapBg);
     root.querySelectorAll('img[src*="/npc/"]').forEach(swapImg);
   }
 
