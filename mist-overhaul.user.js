@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mist Overhaul
 // @namespace    https://github.com/netherguy4/mist-overhaul
-// @version      2026.09.11.1326
+// @version      2026.09.22.0102
 // @description  Анимированные портреты персонажей в Mist
 // @author       nether
 // @match        *://*.mist-game.ru/*
@@ -51,6 +51,7 @@
 
   // --- ссылки на портреты, дальше до конца блока правит build.py ---
   const URLS = {
+    bride_amalia_milton: {"2x": "2x/bride_amalia_milton_8thmarch.fdbbe937.webm", "3x": "3x/bride_amalia_milton_8thmarch.202b834c.webm"},
     bride_amalia_milton_8thmarch: {"2x": "2x/bride_amalia_milton_8thmarch.fdbbe937.webm", "3x": "3x/bride_amalia_milton_8thmarch.202b834c.webm"},
     caravaneer: {"2x": "2x/caravaneer.8a3a4992.webm", "3x": "3x/caravaneer.6e911852.webm"},
     corvin: {"2x": "2x/corvin.c0f15317.webm", "3x": "3x/corvin.b8778f58.webm"},
@@ -88,6 +89,7 @@
   const UNITS = {
     215: 'gorkonia',
     216: 'demandred',
+    293: 'bride_amalia_milton',
     294: 'indiana_lester',
     295: 'rogue_brun',
     296: 'prisoner_toivo_beilish',

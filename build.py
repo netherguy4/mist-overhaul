@@ -42,6 +42,15 @@ MIN_LOOP = 72        # кадров, минимум 3 с — короче пет
 BRIDGE = 3           # синтезированных кадров, которыми закрывается стык петли
 BAR = 10             # яркость, ниже которой строка кадра считается чёрным полем
 
+# Игровое имя -> имя ассета. Один портрет приходит под несколькими адресами:
+# у Амалии обычный /npc/bride_amalia_milton.jpg и праздничный _8thmarch, а
+# отдельного видео у обычной нет — оба адреса ведут на праздничную анимацию.
+ALIASES = {"bride_amalia_milton": "bride_amalia_milton_8thmarch"}
+
+
+def asset(name: str):
+    return ALIASES.get(name, name)
+
 def run(cmd, **kw):
     return subprocess.run(cmd, check=True, capture_output=True, **kw)
 
@@ -256,17 +265,18 @@ def main():
         done = build(videos[name], still, original, name) if name in videos else None
         names.append(done or build_still(still, original, name))
 
+    served = sorted(names + [a for a, n in ALIASES.items() if n in names])
     rules = [{
         "id": i,
         "priority": 1,
         "action": {"type": "redirect",
-                   "redirect": {"extensionPath": f"/npc/3x/{built(n).name}"}},
+                   "redirect": {"extensionPath": f"/npc/3x/{built(asset(n)).name}"}},
         "condition": {"urlFilter": f"||i.mist-game.ru/npc/{n}.jpg",
                       "resourceTypes": ["image"]},
-    } for i, n in enumerate(sorted(names), 1)]
+    } for i, n in enumerate(served, 1)]
     (ROOT / "extension" / "rules.json").write_text(
         json.dumps(rules, indent=2, ensure_ascii=False) + "\n")
-    write_userscript(sorted(names))
+    write_userscript(served)
     print(f"\nrules.json: {len(rules)} персонажей")
 
 
@@ -281,7 +291,7 @@ def write_userscript(names):
     version = time.strftime("%Y.%m.%d.%H%M")
 
     def entry(n):
-        by_tier = ", ".join(f'"{t}": "{t}/{built(n, t).name}"' for t in TIERS)
+        by_tier = ", ".join(f'"{t}": "{t}/{built(asset(n), t).name}"' for t in TIERS)
         return f"    {n}: {{{by_tier}}}"
     urls = ",\n".join(entry(n) for n in names)
 
