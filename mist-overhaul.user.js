@@ -1,28 +1,26 @@
 // ==UserScript==
 // @name         Mist Overhaul
 // @namespace    https://github.com/netherguy4/mist-overhaul
-// @version      2026.09.22.2316
+// @version      2026.09.22.2317
 // @description  Анимированные портреты персонажей в Mist
 // @author       nether
 // @match        *://*.mist-game.ru/*
 // @match        https://templars-clan.online/*
 // @match        https://www.templars-clan.online/*
-// @match        https://mist.dev.nether.pp.ua/*
 // @run-at       document-start
 // @grant        none
-// сам скрипт раздаёт Codeberg: raw.githubusercontent открывается не у всех в
-// РФ, а jsDelivr держал бы ветку 12 часов — purge на это не годится, проверяли.
-// У Codeberg тот же профиль, что у raw: анонимно, text/plain, max-age=300.
-// Туда его кладёт publish.sh, отдельным репозиторием на один файл.
-// @updateURL    https://codeberg.org/netherguy/mist-overhaul-script/raw/branch/main/mist-overhaul.user.js
-// @downloadURL  https://codeberg.org/netherguy/mist-overhaul-script/raw/branch/main/mist-overhaul.user.js
+// сам скрипт раздаёт сайт клана: raw.githubusercontent, jsDelivr и Codeberg
+// открываются из РФ и Украины не у всех, а сайт открывается; к GitHub за
+// свежим файлом ходит уже он.
+// @updateURL    https://templars-clan.online/mist-overhaul.user.js
+// @downloadURL  https://templars-clan.online/mist-overhaul.user.js
 // ==/UserScript==
 
 (() => {
   'use strict';
 
   // На сайте клана нужна только версия: портреты и их кеш здесь не трогаем.
-  if (['https://templars-clan.online', 'https://www.templars-clan.online', 'https://mist.dev.nether.pp.ua'].includes(location.origin)) {
+  if (['https://templars-clan.online', 'https://www.templars-clan.online'].includes(location.origin)) {
     window.addEventListener('message', (event) => {
       if (event.source !== window || event.origin !== location.origin) return;
       const request = event.data;
@@ -109,20 +107,16 @@
   const backgrounds = new WeakMap();
   const CACHE = 'mist-overhaul';
 
-  // Одно и то же содержимое на нескольких зеркалах: из РФ jsDelivr достаётся
-  // не у всех, и тогда портреты просто не качались. Пробуем по порядку, первое
-  // ответившее запоминаем — иначе каждая страница заново ждала бы таймаут на
-  // заблокированном хосте. raw последний: он не CDN и медленнее, зато без
-  // кеша — когда зеркала jsDelivr ещё отдают прошлый коммит (у них до 12 ч),
-  // свежий файл лежит только там, и перебор доходит до него сам.
+  // Портреты отдаёт сайт клана: jsDelivr и raw из РФ и Украины достаются не у
+  // всех, а сайт открывается и сам тянет файлы с GitHub. raw остался запасным —
+  // до него доходит walk(), если сайт лежит. Ключ в localStorage новый: под
+  // прежним лежал номер зеркала из старого списка.
   const HOSTS = [
-    'https://cdn.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc',
-    'https://gcore.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc',
-    'https://fastly.jsdelivr.net/gh/netherguy4/mist-overhaul@main/extension/npc',
+    'https://templars-clan.online/mist-overhaul/npc',
     'https://raw.githubusercontent.com/netherguy4/mist-overhaul/main/extension/npc',
   ];
-  let host = Math.min(+localStorage.mistOverhaulHost || 0, HOSTS.length - 1);
-  let known = 'mistOverhaulHost' in localStorage;
+  let host = Math.min(+localStorage.mistOverhaulMirror || 0, HOSTS.length - 1);
+  let known = 'mistOverhaulMirror' in localStorage;
 
   // Ключ в хранилище — свой, а не адрес зеркала: иначе смена зеркала выглядела
   // бы как новый файл и всё качалось бы заново.
@@ -137,7 +131,7 @@
   let detachedVideo;
 
   function pick(at) {
-    localStorage.mistOverhaulHost = host = at;
+    localStorage.mistOverhaulMirror = host = at;
     known = true;
   }
 
