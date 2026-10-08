@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Mist Overhaul
 // @namespace    https://github.com/netherguy4/mist-overhaul
-// @version      2026.09.22.2317
+// @version      2026.10.08.1648
 // @description  Анимированные портреты персонажей в Mist
 // @author       nether
 // @match        *://*.mist-game.ru/*
@@ -128,7 +128,7 @@
   const ready = self.caches ? caches.open(CACHE).then(c => (store = c), () => {})
                             : Promise.resolve();
   const blobs = new Map();              // адрес -> blob:, только для показанных
-  let detachedVideo;
+  let detachedPortrait;
 
   function pick(at) {
     localStorage.mistOverhaulMirror = host = at;
@@ -182,26 +182,39 @@
     const hit = store && await store.match(KEY + path);
     if (!hit) return `${HOSTS[host]}/${path}`;
     blobs.set(path, URL.createObjectURL(await hit.blob()));
-    // портрет на экране один, держать больше пары незачем: это десятки мегабайт
-    for (const old of [...blobs.keys()].slice(0, -2)) {
-      URL.revokeObjectURL(blobs.get(old));
-      blobs.delete(old);
-    }
+    // Адрес живёт до ухода со страницы: его ещё может использовать переносимый портрет.
     return blobs.get(path);
   }
 
   /** Постер анимации: первый кадр под тем же хешем, что и webm. */
   const poster = path => path.replace(/\.webm$/, '.webp');
 
+  function showPortrait(el, state) {
+    el.style.backgroundSize = '100% 100%';
+    el.style.backgroundRepeat = 'no-repeat';
+    el.style.backgroundImage = `${state.image}, ${state.original}`;
+    state.rendered = getComputedStyle(el).backgroundImage;
+    if (!state.video) return;
+    if (getComputedStyle(el).position === 'static') el.style.position = 'relative';
+    if (state.video.parentElement !== el) {
+      el.appendChild(state.video);
+      state.video.play().catch(() => {}); // отсоединённое видео браузер мог остановить
+    }
+  }
+
   async function swapBg(el) {
+    if (!el.isConnected) return;
     const cur = getComputedStyle(el).backgroundImage;
     const name = npcName(cur);
     const previous = backgrounds.get(el);
-    if (previous && cur === previous.rendered) return;
+    if (previous && cur === previous.rendered
+        && (!previous.video || previous.video.parentElement === el)) return;
     const path = URLS[name]?.[TIER];
+    const reuse = previous?.name === name && previous?.image ? previous
+      : detachedPortrait?.name === name ? detachedPortrait : null;
     if (previous) {
       backgrounds.delete(el);
-      el.querySelector('video.mist-overhaul')?.remove();
+      if (previous.video !== reuse?.video) previous.video?.remove();
       delete el.dataset.mistOverhaul;
       el.style.backgroundSize = previous.size;
       el.style.backgroundRepeat = previous.repeat;
@@ -209,45 +222,42 @@
     }
     if (!path) return;
     const state = {
+      name, original: cur === previous?.rendered ? previous.original : cur,
       rendered: cur, size: el.style.backgroundSize,
       repeat: el.style.backgroundRepeat, position: el.style.position,
+      image: reuse?.image, video: reuse?.video,
     };
     backgrounds.set(el, state);
-    const current = () => backgrounds.get(el) === state
+    const current = () => el.isConnected && backgrounds.get(el) === state
       && getComputedStyle(el).backgroundImage === state.rendered;
     el.dataset.mistOverhaul = name;
-    // в игре стоит background-size: auto, а наши картинки вдвое крупнее
-    el.style.backgroundSize = '100% 100%';
-    el.style.backgroundRepeat = 'no-repeat';
+    detachedPortrait = null;
+    // При смене квеста готовый слой переносим в том же проходе observer, до отрисовки.
+    if (state.image) {
+      showPortrait(el, state);
+      return;
+    }
     const src = await source(path);
     if (!current()) return;
 
-    el.querySelector('video.mist-overhaul')?.remove();
     if (!path.endsWith('.webm')) {
       // статичный портрет — обычным фоном, оригинал остаётся нижним слоем
-      el.style.backgroundImage = `url(${src}), ${cur}`;
-      state.rendered = getComputedStyle(el).backgroundImage;
+      state.image = `url(${src})`;
+      showPortrait(el, state);
       return;
     }
     // анимацию фоном не поставить, поэтому кладём <video> поверх, а под него —
     // постер с первым кадром: без него на кадр-два виден оригинал
     const still = await source(poster(path));
     if (!current()) return;
-    el.style.backgroundImage = `url(${still}), ${cur}`;
-    state.rendered = getComputedStyle(el).backgroundImage;
-    let v = detachedVideo?.dataset.npc === name ? detachedVideo : null;
-    detachedVideo = null;
-    if (!v) {
-      v = document.createElement('video');
-      v.className = 'mist-overhaul';
-      v.dataset.npc = name;
-      Object.assign(v, { src, autoplay: true, loop: true, muted: true, playsInline: true });
-      v.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;'
-                      + 'object-fit:fill;pointer-events:none';
-    }
-    if (getComputedStyle(el).position === 'static') el.style.position = 'relative';
-    el.appendChild(v);
-    v.play().catch(() => {});            // после возврата во вкладку autoplay сам не возобновляется
+    state.image = `url(${still})`;
+    const v = state.video = document.createElement('video');
+    v.className = 'mist-overhaul';
+    v.dataset.npc = name;
+    Object.assign(v, { src, autoplay: true, loop: true, muted: true, playsInline: true });
+    v.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;'
+                    + 'object-fit:fill;pointer-events:none';
+    showPortrait(el, state);
   }
 
   // <img> с портретом в игре пока не встречался, поэтому здесь только статика:
@@ -272,15 +282,24 @@
   // портрет меняется без перезагрузки страницы — и заменой узла, и правкой style
   new MutationObserver(records => {
     for (const r of records) {
+      r.removedNodes.forEach(n => {
+        const v = n.nodeType === 1 && (n.matches('video.mist-overhaul')
+          ? n : n.querySelector('video.mist-overhaul'));
+        if (!v || v.isConnected) return;
+        const state = backgrounds.get(v.parentElement) || backgrounds.get(r.target);
+        if (state?.video === v) detachedPortrait = state;
+      });
+    }
+    for (const r of records) {
       if (r.type === 'attributes') {
-        r.target.tagName === 'IMG' ? swapImg(r.target) : swapBg(r.target);
+        if (r.target.tagName === 'IMG') swapImg(r.target);
+        else if (r.target.matches(PORTRAITS) || backgrounds.has(r.target)) swapBg(r.target);
       } else {
-        r.removedNodes.forEach(n => {
-          const v = n.nodeType === 1 && (n.matches('video.mist-overhaul')
-            ? n : n.querySelector('video.mist-overhaul'));
-          if (v) detachedVideo = v;
+        r.addedNodes.forEach(n => {
+          scan(n);
+          if (n.nodeType === 1 && n.matches(PORTRAITS)) swapBg(n);
         });
-        r.addedNodes.forEach(n => { scan(n); if (n.nodeType === 1) swapBg(n); });
+        if (backgrounds.has(r.target)) swapBg(r.target);
       }
     }
   }).observe(document.documentElement, {

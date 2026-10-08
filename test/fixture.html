@@ -2,7 +2,7 @@
 <!-- Отдать по http (на file:// не поедет <script src>) и открыть с новым
      query-параметром, иначе браузер подсунет закешированный скрипт.
      Ждать все PASS; первый прогон качает ~54 МБ, дальше берёт из хранилища. -->
-<script src="../mist-overhaul.user.js"></script>
+<script>document.write('<script src="../mist-overhaul.user.js?cb=' + encodeURIComponent(location.search) + '"><\/script>');</script>
 
 <div id="host"></div>
 <pre id="out">…</pre>
@@ -39,6 +39,27 @@ const until = async cond => {
   check('масштаб под картинку 2x', /^(100% 100%)(, \1)*$/.test(css('backgroundSize')));
 
   const video = el().querySelector('video.mist-overhaul');
+  check('видео готово к показу', await until(() => video.readyState >= 2 && !video.paused));
+  el().style.cssText = 'width:181px;height:267px;background:url(//i.mist-game.ru/npc/bride_amalia_milton_8thmarch.jpg);border:1px solid #f1e8c9;';
+  await Promise.resolve();
+  check('перезапись фона того же NPC сохраняет готовое видео без паузы',
+    el().querySelector('video.mist-overhaul') === video && !video.paused
+    && css('backgroundImage').split(/,(?=\s*url)/).length === 2);
+  await until(() => el().querySelector('video.mist-overhaul'));
+  put('bride_amalia_milton_8thmarch');
+  await Promise.resolve();
+  check('при смене квеста готовый портрет перенесён до следующего кадра',
+    el().querySelector('video.mist-overhaul') === video && video.readyState >= 2
+    && css('backgroundImage').split(/,(?=\s*url)/).length === 2);
+  await until(() => el().querySelector('video.mist-overhaul'));
+  for (let i = 0; i < 3; i++) put('bride_amalia_milton_8thmarch');
+  await Promise.resolve();
+  check('быстрая смена квестов переносит видео только в последний блок',
+    el().querySelector('video.mist-overhaul') === video && video.isConnected);
+  el().replaceChildren();
+  await Promise.resolve();
+  check('очистка содержимого портрета восстанавливает готовое видео',
+    el().querySelector('video.mist-overhaul') === video);
   el().remove();
   await sleep(200);                   // браузер успевает остановить отсоединённое видео
   put('bride_amalia_milton_8thmarch');
